@@ -1,6 +1,7 @@
 {
   "name": "ms-post",
   "version": "0.0.1",
+  "type": "module",
   "description": "",
   "author": "",
   "private": true,
@@ -28,6 +29,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/microservices": "^11.1.14",
     "@nestjs/platform-express": "^11.0.1",
+    "@volontariapp/contracts": "link:/Users/victoragahi/Developer/meta/npm-packages/packages/contracts",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "joi": "^18.0.2",
@@ -44,6 +46,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
+    "@volontariapp/eslint-config": "link:/Users/victoragahi/Developer/meta/npm-packages/packages/eslint-config",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -58,6 +61,9 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
+  },
+  "engines": {
+    "node": ">=24.14.0"
   },
   "jest": {
     "moduleFileExtensions": [
