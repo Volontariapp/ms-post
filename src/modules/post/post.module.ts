@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { PostController } from './post.controller.js';
-import { PostGrpcController } from './post.grpc.controller.js';
+import { PostCommandController } from './controllers/post.command.controller.js';
+import { PostQueryController } from './controllers/post.query.controller.js';
 
 @Module({
-  controllers: [PostController, PostGrpcController],
+  controllers: [PostCommandController, PostQueryController],
 })
 export class PostModule {}
