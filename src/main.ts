@@ -1,20 +1,13 @@
 import './tracing.js';
 import 'reflect-metadata';
 import { existsSync } from 'fs';
-import { dirname, join } from 'path';
-import { createRequire } from 'module';
+import { join } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { GRPC_SERVICES, getGrpcOptions } from '@volontariapp/contracts';
 import { AppConfigService } from './config/app-config.service.js';
 import { loadConfig } from '@volontariapp/config';
 import { CustomConfig } from './config/base-config.js';
-
-const require = createRequire(import.meta.url);
-
-const contractsPath = dirname(
-  require.resolve('@volontariapp/contracts/package.json'),
-);
 
 function resolveConfigDirectory(): string {
   const rootConfigDir = join(process.cwd(), 'config');
@@ -31,25 +24,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule.register(appConfig));
   const configService = app.get(AppConfigService);
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.GRPC,
-    options: {
-      package: 'volontariapp.post',
-      protoPath: join(
-        contractsPath,
-        'proto/volontariapp/post/post.services.proto',
-      ),
-      url: configService.config.microServices.msPostUrl,
-      loader: {
-        keepCase: true,
-        longs: String,
-        enums: String,
-        defaults: true,
-        oneofs: true,
-        includeDirs: [join(contractsPath, 'proto')],
-      },
-    },
-  });
+  app.connectMicroservice(
+    getGrpcOptions(
+      GRPC_SERVICES.POST,
+      configService.config.microServices.msPostUrl,
+    ),
+  );
 
   await app.startAllMicroservices();
   await app.listen(configService.config.port);
