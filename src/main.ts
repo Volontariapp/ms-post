@@ -1,7 +1,8 @@
 import './tracing.js';
 import 'reflect-metadata';
 import { existsSync } from 'fs';
-import { join } from 'path';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { GRPC_SERVICES, getGrpcOptions } from '@volontariapp/contracts';
@@ -10,12 +11,14 @@ import { loadConfig } from '@volontariapp/config';
 import { CustomConfig } from './config/base-config.js';
 
 function resolveConfigDirectory(): string {
-  const rootConfigDir = join(process.cwd(), 'config');
+  const currentFileDir = dirname(fileURLToPath(import.meta.url));
+  const repositoryRootDir = join(currentFileDir, '..');
+  const rootConfigDir = join(repositoryRootDir, 'config');
   if (existsSync(rootConfigDir)) {
     return rootConfigDir;
   }
 
-  return join(process.cwd(), 'src/config');
+  throw new Error(`Config directory not found: ${rootConfigDir}`);
 }
 
 async function bootstrap() {
