@@ -10,11 +10,11 @@ import { BaseConfig as SharedBaseConfig } from '@volontariapp/config';
 export class MSURLs {
   @IsDefined()
   @IsNotEmpty()
-  msUserUrl!: string;
+  msPostUrl!: string;
 
   @IsDefined()
   @IsNotEmpty()
-  msPostUrl!: string;
+  msUserUrl!: string;
 
   @IsDefined()
   @IsNotEmpty()
