@@ -1,43 +1,40 @@
 import './tracing.js';
 import 'reflect-metadata';
+import { existsSync } from 'fs';
 import { dirname, join } from 'path';
-import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { GRPC_SERVICES, getGrpcOptions } from '@volontariapp/contracts';
 import { AppConfigService } from './config/app-config.service.js';
+import { loadConfig } from '@volontariapp/config';
+import { CustomConfig } from './config/base-config.js';
 
-const require = createRequire(import.meta.url);
+function resolveConfigDirectory(): string {
+  const currentFileDir = dirname(fileURLToPath(import.meta.url));
+  const repositoryRootDir = join(currentFileDir, '..');
+  const rootConfigDir = join(repositoryRootDir, 'config');
+  if (existsSync(rootConfigDir)) {
+    return rootConfigDir;
+  }
 
-const contractsPath = dirname(
-  require.resolve('@volontariapp/contracts/package.json'),
-);
+  throw new Error(`Config directory not found: ${rootConfigDir}`);
+}
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const appConfig = loadConfig(resolveConfigDirectory(), CustomConfig);
+  console.log(`app config: ${JSON.stringify(appConfig)}`);
+  const app = await NestFactory.create(AppModule.register(appConfig));
   const configService = app.get(AppConfigService);
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.GRPC,
-    options: {
-      package: 'volontariapp.post',
-      protoPath: join(
-        contractsPath,
-        'proto/volontariapp/post/post.services.proto',
-      ),
-      url: configService.msPostUrl,
-      loader: {
-        keepCase: true,
-        longs: String,
-        enums: String,
-        defaults: true,
-        oneofs: true,
-        includeDirs: [join(contractsPath, 'proto')],
-      },
-    },
-  });
+  app.connectMicroservice(
+    getGrpcOptions(
+      GRPC_SERVICES.POST,
+      configService.config.microServices.msPostUrl,
+    ),
+  );
 
   await app.startAllMicroservices();
-  await app.listen(process.env.PORT ?? 3002);
+  await app.listen(configService.config.port);
 }
 bootstrap();
