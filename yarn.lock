@@ -3663,14 +3663,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/config@npm:0.1.0-next.20260406234021":
-  version: 0.1.0-next.20260406234021
-  resolution: "@volontariapp/config@npm:0.1.0-next.20260406234021"
-  dependencies:
-    class-transformer: "npm:^0.5.1"
-    class-validator: "npm:^0.15.1"
-    reflect-metadata: "npm:^0.2.2"
-  checksum: 10c0/abd7089dd388475a28d1bebdee81dc15e07a5c91b7eef4023d20d9afa40fbf4185d61dfa666e8517b7ddf0ae231fbd12731599f0675f6a5f1644518c975efb72
 "@volontariapp/auth@npm:2.0.0":
   version: 2.0.0
   resolution: "@volontariapp/auth@npm:2.0.0"
@@ -3685,6 +3677,17 @@ __metadata:
     "@nestjs/core": ^10.0.0 || ^11.0.0
     "@nestjs/microservices": ^10.0.0 || ^11.0.0
   checksum: 10c0/2c15c931d7332baa0bb69e90a97b461902e2ee8a6bebc9de1f52186b404961d725af6e96a240a1ac3b8794f8f508a0f2528cf868af297e23f7d3855794c09c2e
+  languageName: node
+  linkType: hard
+
+"@volontariapp/config@npm:0.1.0-next.20260406234021":
+  version: 0.1.0-next.20260406234021
+  resolution: "@volontariapp/config@npm:0.1.0-next.20260406234021"
+  dependencies:
+    class-transformer: "npm:^0.5.1"
+    class-validator: "npm:^0.15.1"
+    reflect-metadata: "npm:^0.2.2"
+  checksum: 10c0/abd7089dd388475a28d1bebdee81dc15e07a5c91b7eef4023d20d9afa40fbf4185d61dfa666e8517b7ddf0ae231fbd12731599f0675f6a5f1644518c975efb72
   languageName: node
   linkType: hard
 
@@ -7803,8 +7806,8 @@ __metadata:
     "@types/jest": "npm:^30.0.0"
     "@types/node": "npm:^22.10.7"
     "@types/supertest": "npm:^6.0.2"
-    "@volontariapp/config": "npm:0.1.0-next.20260406234021"
     "@volontariapp/auth": "npm:2.0.0"
+    "@volontariapp/config": "npm:0.1.0-next.20260406234021"
     "@volontariapp/contracts": "npm:2.1.1"
     "@volontariapp/errors": "npm:0.2.0"
     "@volontariapp/errors-nest": "npm:0.3.0"
