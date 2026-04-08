@@ -25,10 +25,10 @@ export class CustomConfig extends SharedBaseConfig {
   @IsDefined()
   @Type(() => Number)
   @IsNumber()
-  port!: number;
+  declare port: number;
 
   @IsDefined()
   @ValidateNested()
   @Type(() => MSURLs)
-  microServices!: MSURLs;
+  declare microServices: MSURLs;
 }
