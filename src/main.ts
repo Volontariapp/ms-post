@@ -9,6 +9,7 @@ import { GRPC_SERVICES, getGrpcOptions } from '@volontariapp/contracts';
 import { AppConfigService } from './config/app-config.service.js';
 import { loadConfig } from '@volontariapp/config';
 import { CustomConfig } from './config/base-config.js';
+import { Logger } from '@volontariapp/logger';
 
 function resolveConfigDirectory(): string {
   const currentFileDir = dirname(fileURLToPath(import.meta.url));
@@ -23,8 +24,12 @@ function resolveConfigDirectory(): string {
 
 async function bootstrap() {
   const appConfig = loadConfig(resolveConfigDirectory(), CustomConfig);
-  console.log(`app config: ${JSON.stringify(appConfig)}`);
-  const app = await NestFactory.create(AppModule.register(appConfig));
+  const logger = new Logger({ context: 'MS-POST', format: 'json' });
+  logger.debug(`app config: ${JSON.stringify(appConfig)}`);
+  const app = await NestFactory.create(AppModule.register(appConfig), {
+    logger,
+  });
+  app.useLogger(logger);
   const configService = app.get(AppConfigService);
 
   app.connectMicroservice(
