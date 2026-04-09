@@ -24,12 +24,13 @@ function resolveConfigDirectory(): string {
 
 async function bootstrap() {
   const appConfig = loadConfig(resolveConfigDirectory(), CustomConfig);
-  const logger = new Logger({ context: 'MS-POST', format: 'json' });
-  logger.debug(`app config: ${JSON.stringify(appConfig)}`);
+  const logger = new Logger({
+    context: 'MS-POST',
+    format: appConfig.logger.format,
+  });
   const app = await NestFactory.create(AppModule.register(appConfig), {
     logger,
   });
-  app.useLogger(logger);
   const configService = app.get(AppConfigService);
 
   app.connectMicroservice(
