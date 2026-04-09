@@ -8,10 +8,6 @@
     "maxPoolSize": 10,
     "ssl": false
   },
-  "redis": {
-    "host": "localhost",
-    "port": 6379
-  },
   "logger": {
     "level": "info",
     "format": "text"
