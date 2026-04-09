@@ -1,14 +1,27 @@
 {
   "db": {
     "host": "localhost",
-    "port": 5432
+    "port": 5432,
+    "username": "postgres",
+    "password": "password",
+    "database": "ms_post_db",
+    "maxPoolSize": 10,
+    "ssl": false
   },
   "redis": {
     "host": "localhost",
     "port": 6379
   },
   "logger": {
-    "level": "info"
+    "level": "info",
+    "format": "text"
+  },
+  "auth": {
+    "internalPublicKeyPath": "certs/internal.pub",
+    "accessTokenPrivateKeyPath": "certs/access.key",
+    "refreshTokenPrivateKeyPath": "certs/refresh.key",
+    "accessTokenExpiresIn": "15m",
+    "refreshTokenExpiresIn": "7d"
   },
   "microServices": {
     "msUserUrl": "localhost:5001",
