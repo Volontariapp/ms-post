@@ -1,34 +1,23 @@
-import { Type } from 'class-transformer';
 import {
-  IsDefined,
-  IsNotEmpty,
-  IsNumber,
-  ValidateNested,
-} from 'class-validator';
-import { BaseConfig as SharedBaseConfig } from '@volontariapp/config';
+  BackendConfig,
+  PostgresConfig,
+  MSURLsConfig,
+} from '@volontariapp/config';
+import { Type } from 'class-transformer';
+import { IsDefined, ValidateNested } from 'class-validator';
 
-export class MSURLs {
-  @IsDefined()
-  @IsNotEmpty()
-  msPostUrl!: string;
-
-  @IsDefined()
-  @IsNotEmpty()
-  msUserUrl!: string;
-
-  @IsDefined()
-  @IsNotEmpty()
-  msEventUrl!: string;
-}
-
-export class CustomConfig extends SharedBaseConfig {
+export class CustomConfig extends BackendConfig {
   @IsDefined()
   @Type(() => Number)
-  @IsNumber()
   declare port: number;
 
   @IsDefined()
   @ValidateNested()
-  @Type(() => MSURLs)
-  declare microServices: MSURLs;
+  @Type(() => MSURLsConfig)
+  declare microServices: MSURLsConfig;
+
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => PostgresConfig)
+  db!: PostgresConfig;
 }
