@@ -42,4 +42,7 @@ async function bootstrap() {
   await app.startAllMicroservices();
   await app.listen(configService.config.port);
 }
-bootstrap();
+void bootstrap().catch((err: unknown) => {
+  console.error(err);
+  process.exit(1);
+});
