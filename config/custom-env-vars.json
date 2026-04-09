@@ -14,11 +14,7 @@
     "format": "LOGGER_FORMAT"
   },
   "auth": {
-    "internalPublicKeyPath": "AUTH_INTERNAL_PUBLIC_KEY_PATH",
-    "accessTokenPrivateKeyPath": "AUTH_ACCESS_TOKEN_PRIVATE_KEY_PATH",
-    "refreshTokenPrivateKeyPath": "AUTH_REFRESH_TOKEN_PRIVATE_KEY_PATH",
-    "accessTokenExpiresIn": "AUTH_ACCESS_TOKEN_EXPIRES_IN",
-    "refreshTokenExpiresIn": "AUTH_REFRESH_TOKEN_EXPIRES_IN"
+    "internalPublicKeyPath": "AUTH_INTERNAL_PUBLIC_KEY_PATH"
   },
   "microServices": {
     "msUserUrl": "MS_USER_URL",

@@ -13,11 +13,7 @@
     "format": "text"
   },
   "auth": {
-    "internalPublicKeyPath": "certs/internal.pub",
-    "accessTokenPrivateKeyPath": "certs/access.key",
-    "refreshTokenPrivateKeyPath": "certs/refresh.key",
-    "accessTokenExpiresIn": "15m",
-    "refreshTokenExpiresIn": "7d"
+    "internalPublicKeyPath": "certs/internal.pub"
   },
   "microServices": {
     "msUserUrl": "localhost:5001",
