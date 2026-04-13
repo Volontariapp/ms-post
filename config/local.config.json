@@ -1,4 +1,11 @@
 {
+  "db": {
+    "host": "localhost",
+    "port": 5433,
+    "username": "user",
+    "password": "password",
+    "database": "ms_post"
+  },
   "logger": {
     "level": "debug",
     "format": "text"
