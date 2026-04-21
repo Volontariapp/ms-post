@@ -5,11 +5,14 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-import { GRPC_SERVICES, getGrpcOptions } from '@volontariapp/contracts';
 import { AppConfigService } from './config/app-config.service.js';
 import { loadConfig } from '@volontariapp/config';
 import { CustomConfig } from './config/base-config.js';
 import { Logger } from '@volontariapp/logger';
+import {
+  GRPC_MICROSERVICES,
+  getGrpcOptions,
+} from '@volontariapp/contracts-nest';
 
 function resolveConfigDirectory(): string {
   const currentFileDir = dirname(fileURLToPath(import.meta.url));
@@ -35,9 +38,12 @@ async function bootstrap() {
 
   app.connectMicroservice(
     getGrpcOptions(
-      GRPC_SERVICES.POST,
+      GRPC_MICROSERVICES.POST,
       configService.config.microServices.msPostUrl,
     ),
+    {
+      inheritAppConfig: true,
+    },
   );
 
   await app.startAllMicroservices();

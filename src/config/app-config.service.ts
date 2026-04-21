@@ -14,4 +14,7 @@ export class AppConfigService {
   get msEventUrl() {
     return this.config.microServices.msEventUrl;
   }
+  get msSocialUrl() {
+    return this.config.microServices.msSocialUrl;
+  }
 }
