@@ -1,8 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
-  POST_SERVICE_NAME,
-  POST_GRPC_METHODS,
   type CreatePostCommand,
   type CreatePostResponse,
   type UpdatePostCommand,
@@ -10,20 +8,21 @@ import {
   type DeletePostCommand,
   type DeletePostResponse,
 } from '@volontariapp/contracts';
+import { GRPC_SERVICES, POST_METHODS } from '@volontariapp/contracts-nest';
 
 @Controller()
 export class PostCommandController {
-  @GrpcMethod(POST_SERVICE_NAME, POST_GRPC_METHODS.CREATE_POST)
+  @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.CREATE_POST)
   createPost(_command: CreatePostCommand): Promise<CreatePostResponse> {
     throw new Error('Method not implemented.');
   }
 
-  @GrpcMethod(POST_SERVICE_NAME, POST_GRPC_METHODS.UPDATE_POST)
+  @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.UPDATE_POST)
   updatePost(_command: UpdatePostCommand): Promise<UpdatePostResponse> {
     throw new Error('Method not implemented.');
   }
 
-  @GrpcMethod(POST_SERVICE_NAME, POST_GRPC_METHODS.DELETE_POST)
+  @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.DELETE_POST)
   deletePost(_command: DeletePostCommand): Promise<DeletePostResponse> {
     throw new Error('Method not implemented.');
   }
