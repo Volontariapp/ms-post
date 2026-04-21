@@ -3921,6 +3921,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@volontariapp/database@npm:1.7.0-snap-a036eab":
+  version: 1.7.0-snap-a036eab
+  resolution: "@volontariapp/database@npm:1.7.0-snap-a036eab"
+  dependencies:
+    "@volontariapp/bridge": "npm:0.2.8"
+    "@volontariapp/errors": "npm:0.4.4"
+    "@volontariapp/logger": "npm:0.2.3"
+    class-transformer: "npm:^0.5.1"
+    class-validator: "npm:^0.14.1"
+    pg: "npm:^8.20.0"
+    reflect-metadata: "npm:^0.2.2"
+  peerDependencies:
+    typeorm: ^0.3.20
+  checksum: 10c0/4d83efea339b5f5b8d0b0ee63c733a0638665d77970c3b2dd394a974101deda164b80eefebcebb87462c6888563c72073309ebf548dc672033b6530022c1017e
+  languageName: node
+  linkType: hard
+
 "@volontariapp/domain-post@npm:2.2.1":
   version: 2.2.1
   resolution: "@volontariapp/domain-post@npm:2.2.1"
@@ -5024,6 +5041,17 @@ __metadata:
   version: 0.5.1
   resolution: "class-transformer@npm:0.5.1"
   checksum: 10c0/19809914e51c6db42c036166839906420bb60367df14e15f49c45c8c1231bf25ae661ebe94736ee29cc688b77101ef851a8acca299375cc52fc141b64acde18a
+  languageName: node
+  linkType: hard
+
+"class-validator@npm:^0.14.1":
+  version: 0.14.4
+  resolution: "class-validator@npm:0.14.4"
+  dependencies:
+    "@types/validator": "npm:^13.15.3"
+    libphonenumber-js: "npm:^1.11.1"
+    validator: "npm:^13.15.22"
+  checksum: 10c0/1d415261aad7bdd72528db76e814195ca627a9d33f159752554dbbf71b8360359d3061a8edd16ac951a9a4fb86e0495cdf8badf82ec44e2dcc187ab496f37c5a
   languageName: node
   linkType: hard
 
@@ -8228,6 +8256,7 @@ __metadata:
     "@volontariapp/config": "npm:2.0.0"
     "@volontariapp/contracts": "npm:4.0.2"
     "@volontariapp/contracts-nest": "npm:3.0.2"
+    "@volontariapp/database": "npm:1.7.0-snap-a036eab"
     "@volontariapp/domain-post": "npm:2.2.1"
     "@volontariapp/errors": "npm:0.4.4"
     "@volontariapp/errors-nest": "npm:0.9.0"

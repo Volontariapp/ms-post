@@ -21,7 +21,17 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --passWithNoTests",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "node --loader ts-node/esm ./node_modules/typeorm/cli.js",
+    "migration:generate": "yarn typeorm migration:generate -d src/config/data-source.ts",
+    "migration:run:local": "NODE_ENV=local yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:run:dev": "NODE_ENV=development yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:run:test": "NODE_ENV=test yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:run:prod": "NODE_ENV=production yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:revert:local": "NODE_ENV=local yarn typeorm migration:revert -d src/config/data-source.ts",
+    "migration:revert:dev": "NODE_ENV=development yarn typeorm migration:revert -d src/config/data-source.ts",
+    "migration:revert:test": "NODE_ENV=test yarn typeorm migration:revert -d src/config/data-source.ts",
+    "migration:revert:prod": "NODE_ENV=production yarn typeorm migration:revert -d src/config/data-source.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",
@@ -42,6 +52,7 @@
     "@volontariapp/config": "2.0.0",
     "@volontariapp/contracts": "4.0.2",
     "@volontariapp/contracts-nest": "3.0.2",
+    "@volontariapp/database": "1.7.0-snap-a036eab",
     "@volontariapp/domain-post": "2.2.1",
     "@volontariapp/errors": "0.4.4",
     "@volontariapp/errors-nest": "0.9.0",
