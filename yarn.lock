@@ -3921,9 +3921,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/database@npm:1.7.0-snap-a036eab":
-  version: 1.7.0-snap-a036eab
-  resolution: "@volontariapp/database@npm:1.7.0-snap-a036eab"
+"@volontariapp/database@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@volontariapp/database@npm:1.7.0"
   dependencies:
     "@volontariapp/bridge": "npm:0.2.8"
     "@volontariapp/errors": "npm:0.4.4"
@@ -3934,7 +3934,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
   peerDependencies:
     typeorm: ^0.3.20
-  checksum: 10c0/4d83efea339b5f5b8d0b0ee63c733a0638665d77970c3b2dd394a974101deda164b80eefebcebb87462c6888563c72073309ebf548dc672033b6530022c1017e
+  checksum: 10c0/bf6ddf2d65df8bfe54aad356f2a566d21bb6ec60db3b25e6412e4f1f483e8b84428a37724a405a04b988b65a9ec5a3ff14cfac170844f29ee191a3f8146093a0
   languageName: node
   linkType: hard
 
@@ -8256,7 +8256,7 @@ __metadata:
     "@volontariapp/config": "npm:2.0.0"
     "@volontariapp/contracts": "npm:4.0.2"
     "@volontariapp/contracts-nest": "npm:3.0.2"
-    "@volontariapp/database": "npm:1.7.0-snap-a036eab"
+    "@volontariapp/database": "npm:1.7.0"
     "@volontariapp/domain-post": "npm:2.2.1"
     "@volontariapp/errors": "npm:0.4.4"
     "@volontariapp/errors-nest": "npm:0.9.0"
