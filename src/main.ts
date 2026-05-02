@@ -9,10 +9,7 @@ import { AppConfigService } from './config/app-config.service.js';
 import { loadConfig } from '@volontariapp/config';
 import { CustomConfig } from './config/base-config.js';
 import { Logger } from '@volontariapp/logger';
-import {
-  GRPC_MICROSERVICES,
-  getGrpcOptions,
-} from '@volontariapp/contracts-nest';
+import { GRPC_MICROSERVICES, getGrpcOptions } from '@volontariapp/contracts-nest';
 
 function resolveConfigDirectory(): string {
   const currentFileDir = dirname(fileURLToPath(import.meta.url));
@@ -37,10 +34,7 @@ async function bootstrap() {
   const configService = app.get(AppConfigService);
 
   app.connectMicroservice(
-    getGrpcOptions(
-      GRPC_MICROSERVICES.POST,
-      configService.config.microServices.msPostUrl,
-    ),
+    getGrpcOptions(GRPC_MICROSERVICES.POST, configService.config.microServices.msPostUrl),
     {
       inheritAppConfig: true,
     },

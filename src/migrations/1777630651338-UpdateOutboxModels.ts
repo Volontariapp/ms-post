@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class UpdateOutboxModels1777630651338 implements MigrationInterface {
   name = 'UpdateOutboxModels1777630651338';

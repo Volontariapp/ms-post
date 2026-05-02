@@ -1,8 +1,4 @@
-import {
-  BackendConfig,
-  PostgresConfig,
-  MSURLsConfig,
-} from '@volontariapp/config';
+import { BackendConfig, PostgresConfig, MSURLsConfig } from '@volontariapp/config';
 import { Type } from 'class-transformer';
 import { IsDefined, ValidateNested } from 'class-validator';
 

@@ -29,8 +29,6 @@ export const AppDataSource = new DataSource({
   database: appConfig.db.database,
   ssl: appConfig.db.ssl ? { rejectUnauthorized: false } : false,
   entities: [EventQueueModel, JobsOutboxModel],
-  migrations: [
-    join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations', '*.ts'),
-  ],
+  migrations: [join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations', '*.ts')],
   synchronize: false,
 });
