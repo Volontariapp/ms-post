@@ -3768,9 +3768,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/auth@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@volontariapp/auth@npm:3.1.0"
+"@volontariapp/auth@npm:3.2.2":
+  version: 3.2.2
+  resolution: "@volontariapp/auth@npm:3.2.2"
   dependencies:
     "@volontariapp/errors": "npm:0.5.0"
     "@volontariapp/errors-nest": "npm:0.10.2"
@@ -3784,7 +3784,7 @@ __metadata:
     "@nestjs/common": ^10.0.0 || ^11.0.0
     "@nestjs/core": ^10.0.0 || ^11.0.0
     "@nestjs/microservices": ^10.0.0 || ^11.0.0
-  checksum: 10c0/d6067236ae0aae287e4f792285aeaa1e0330a28438eddb978eefe6d0a8711b5b63d2ed2a0f2eef5b3c1596351c17ee65c4de921f5fd26fbc660891ca07a5a5f4
+  checksum: 10c0/1cd21cda55aaaa160921f5ebc98f10ded00f7cd6e1598e3287045ae412cfd64f4aea8cbda648df629048edf79d9af446e9cbdcc2e938426926f151b7d5870994
   languageName: node
   linkType: hard
 
@@ -8367,7 +8367,7 @@ __metadata:
     "@types/jest": "npm:^30.0.0"
     "@types/node": "npm:^22.10.7"
     "@types/supertest": "npm:^6.0.2"
-    "@volontariapp/auth": "npm:3.1.0"
+    "@volontariapp/auth": "npm:3.2.2"
     "@volontariapp/bridge-nest": "npm:0.3.11"
     "@volontariapp/config": "npm:2.1.0"
     "@volontariapp/contracts": "npm:4.0.7"
