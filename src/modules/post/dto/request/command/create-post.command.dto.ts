@@ -3,11 +3,8 @@ import { IsString } from 'class-validator';
 
 export class CreatePostCommandDTO implements CreatePostCommand {
   @IsString()
+  title!: string;
+
+  @IsString()
   content!: string;
-
-  @IsString()
-  authorId!: string;
-
-  @IsString()
-  eventId!: string;
 }

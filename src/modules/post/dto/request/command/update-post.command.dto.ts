@@ -1,11 +1,15 @@
-import { UpdatePostCommand } from '@volontariapp/contracts-nest';
-import { IsString, IsOptional } from 'class-validator';
+import { UpdatePostCommand, type Post } from '@volontariapp/contracts-nest';
+import { Type } from 'class-transformer';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { UpdatePostDataDTO } from '../../common/post/update-post-data.dto.js';
 
 export class UpdatePostCommandDTO implements UpdatePostCommand {
-  @IsString()
-  id!: string;
+  @IsArray()
+  @IsString({ each: true })
+  updateMask!: string[];
 
   @IsOptional()
-  @IsString()
-  content?: string;
+  @ValidateNested()
+  @Type(() => UpdatePostDataDTO)
+  post!: Post;
 }
