@@ -3887,12 +3887,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/domain-post@npm:2.2.3":
-  version: 2.2.3
-  resolution: "@volontariapp/domain-post@npm:2.2.3"
+"@volontariapp/domain-post@npm:3.0.0-snap-03cadf2":
+  version: 3.0.0-snap-03cadf2
+  resolution: "@volontariapp/domain-post@npm:3.0.0-snap-03cadf2"
   dependencies:
+    "@nestjs/common": "npm:^11.0.1"
+    "@volontariapp/contracts": "npm:4.0.10"
+    "@volontariapp/database": "npm:1.15.1"
+    "@volontariapp/errors": "npm:0.5.1"
+    "@volontariapp/errors-nest": "npm:0.11.1"
     "@volontariapp/logger": "npm:0.2.4"
-  checksum: 10c0/32298c792f6e59c7efbc08ec72514ef1ee3b6610ae5277717f4cd08013e4b2619c6ab488e695653ae0b727f5ee076538fd917b783531c0a8bafc829fd39709a5
+    "@volontariapp/messaging": "npm:1.1.1"
+    class-transformer: "npm:^0.5.1"
+  checksum: 10c0/b0264a69dd55fc1ea68bf2e328a2d624ba3271a7eba0169b5515b5766b42f8959677902cb2e48799ea6469bb58d7608a8948fa5dd1a4ffdf67ec6401c405e2ad
   languageName: node
   linkType: hard
 
@@ -3990,6 +3997,16 @@ __metadata:
   version: 0.2.4
   resolution: "@volontariapp/logger@npm:0.2.4"
   checksum: 10c0/68f8fccabf6ca4e11cc1e08af6d99cf678a2bfefc75d4892a400b5905c80ec959b637c71f4e86cca2226cf26454520250e4dbe44befb26e994799b4194d4b576
+  languageName: node
+  linkType: hard
+
+"@volontariapp/messaging@npm:1.1.1":
+  version: 1.1.1
+  resolution: "@volontariapp/messaging@npm:1.1.1"
+  dependencies:
+    "@volontariapp/contracts": "npm:4.0.10"
+    "@volontariapp/database": "npm:1.15.1"
+  checksum: 10c0/1d3c29f71e8181dddb4da3cbde63ba358ccc5402692472e302373972e2cb3ee34067dae7b538be69b38f8b61c705545f1d6996a9076a48b82af823c2a79dae58
   languageName: node
   linkType: hard
 
@@ -8316,7 +8333,7 @@ __metadata:
     "@volontariapp/contracts": "npm:4.0.10"
     "@volontariapp/contracts-nest": "npm:3.1.2"
     "@volontariapp/database": "npm:1.15.1"
-    "@volontariapp/domain-post": "npm:2.2.3"
+    "@volontariapp/domain-post": "npm:3.0.0-snap-03cadf2"
     "@volontariapp/errors": "npm:0.5.1"
     "@volontariapp/errors-nest": "npm:0.11.1"
     "@volontariapp/eslint-config": "npm:2.2.3"
