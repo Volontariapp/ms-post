@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
-  type PostQuery,
+  type GetPostQuery,
   type GetPostResponse,
   type ListPostsQuery,
   type ListPostsResponse,
@@ -11,7 +11,7 @@ import { GRPC_SERVICES, POST_METHODS } from '@volontariapp/contracts-nest';
 @Controller()
 export class PostQueryController {
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.GET_POST)
-  getPost(_query: PostQuery): Promise<GetPostResponse> {
+  getPost(_query: GetPostQuery): Promise<GetPostResponse> {
     throw new Error('Method not implemented.');
   }
 
