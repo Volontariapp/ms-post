@@ -19,6 +19,9 @@ jobs:
   
   ci-docker:
     needs: ci
+    permissions:
+      contents: read
+      packages: write
     uses: Volontariapp/ci-tools/.github/workflows/docker-build-push.yml@main
     with:
       service_name: ${{ github.env.SERVICE_NAME }}
