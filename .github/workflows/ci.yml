@@ -7,14 +7,11 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
-env:
-  SERVICE_NAME: ms-post
-
 jobs:
   ci:
     uses: Volontariapp/ci-tools/.github/workflows/ci-service.yml@main
     with:
-      service-name: ${{ github.env.SERVICE_NAME }}
+      service-name: ms-post
     secrets: inherit
   
   ci-docker:
@@ -24,5 +21,5 @@ jobs:
       packages: write
     uses: Volontariapp/ci-tools/.github/workflows/docker-build-push.yml@main
     with:
-      service-name: ${{ github.env.SERVICE_NAME }}
+      service-name: ms-post
     secrets: inherit
