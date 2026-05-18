@@ -3828,6 +3828,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@volontariapp/bridge@npm:1.0.2":
+  version: 1.0.2
+  resolution: "@volontariapp/bridge@npm:1.0.2"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.16"
+    "@volontariapp/config": "npm:3.1.0"
+    "@volontariapp/errors": "npm:0.5.1"
+    "@volontariapp/logger": "npm:0.2.4"
+    ioredis: "npm:^5.10.1"
+    neo4j-driver: "npm:^6.0.1"
+    pg: "npm:^8.20.0"
+    reflect-metadata: "npm:^0.2.2"
+    typeorm: "npm:^0.3.28"
+  checksum: 10c0/d8054c930b85603b781ba603bd2466e1a080ec62b4b292eb3d4c043a6b05ca3cce7a5095fb4c12d8914d62c687f0beec3bec439db6ff45f855bc12a858d03ee4
+  languageName: node
+  linkType: hard
+
 "@volontariapp/config@npm:3.0.1":
   version: 3.0.1
   resolution: "@volontariapp/config@npm:3.0.1"
@@ -3883,12 +3900,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/database@npm:1.15.1":
-  version: 1.15.1
-  resolution: "@volontariapp/database@npm:1.15.1"
+"@volontariapp/database@npm:1.16.0":
+  version: 1.16.0
+  resolution: "@volontariapp/database@npm:1.16.0"
   dependencies:
-    "@volontariapp/bridge": "npm:1.0.1"
-    "@volontariapp/config": "npm:3.0.1"
+    "@volontariapp/bridge": "npm:1.0.2"
+    "@volontariapp/config": "npm:3.1.0"
     "@volontariapp/errors": "npm:0.5.1"
     "@volontariapp/logger": "npm:0.2.4"
     "@volontariapp/shared": "npm:0.4.0"
@@ -3898,7 +3915,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
   peerDependencies:
     typeorm: ^0.3.28
-  checksum: 10c0/83505282fad6e6f113dff3f51ebb62520e866532a46dcb9210415af208d327cdabc2bd3f054e143ab41af9a1fc55586c572283cd0238c21806d0a7f9bf0eee84
+  checksum: 10c0/355fac97a611aab7b2681b205709f7a5b6071c09f2884cdc0cf575c139ce732e45a3768ec4b68b4f999ea2e75b56316024730766bdfd61ff3f51474910eb442e
   languageName: node
   linkType: hard
 
@@ -8337,7 +8354,7 @@ __metadata:
     "@volontariapp/config": "npm:3.1.0"
     "@volontariapp/contracts": "npm:4.0.9"
     "@volontariapp/contracts-nest": "npm:3.1.2"
-    "@volontariapp/database": "npm:1.15.1"
+    "@volontariapp/database": "npm:1.16.0"
     "@volontariapp/domain-post": "npm:2.2.3"
     "@volontariapp/errors": "npm:0.5.1"
     "@volontariapp/errors-nest": "npm:0.11.1"

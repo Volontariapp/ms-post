@@ -53,7 +53,7 @@
     "@volontariapp/config": "3.1.0",
     "@volontariapp/contracts": "4.0.10",
     "@volontariapp/contracts-nest": "3.1.2",
-    "@volontariapp/database": "1.15.1",
+    "@volontariapp/database": "1.16.0",
     "@volontariapp/domain-post": "2.2.3",
     "@volontariapp/errors": "0.5.1",
     "@volontariapp/errors-nest": "0.11.1",
@@ -150,6 +150,7 @@
     ]
   },
   "resolutions": {
+    "@volontariapp/database": "1.16.0",
     "glob": "^13.0.6",
     "node-domexception": "1.0.0",
     "gaxios": "^6.7.1"

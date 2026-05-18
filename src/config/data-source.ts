@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
 
 import { loadConfig } from '@volontariapp/config';
-import { EventQueueModel, JobsOutboxModel } from '@volontariapp/database';
+import { EventQueueModel, JobsOutboxModel, JobAuditModel } from '@volontariapp/database';
 
 function resolveConfigDirectory(): string {
   const currentFileDir = dirname(fileURLToPath(import.meta.url));
@@ -28,7 +28,7 @@ export const AppDataSource = new DataSource({
   password: appConfig.db.password,
   database: appConfig.db.database,
   ssl: appConfig.db.ssl ? { rejectUnauthorized: false } : false,
-  entities: [EventQueueModel, JobsOutboxModel],
+  entities: [EventQueueModel, JobsOutboxModel, JobAuditModel],
   migrations: [join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations', '*.{ts,js}')],
   synchronize: false,
 });
