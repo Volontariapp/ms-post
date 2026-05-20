@@ -23,3 +23,13 @@ jobs:
     with:
       service-name: ms-post
     secrets: inherit
+
+  e2e:
+    needs: [ci-docker]
+    uses: Volontariapp/ci-tools/.github/workflows/e2e-orchestrator.yml@main
+    secrets: inherit
+
+  validate-e2e-matrix:
+    uses: Volontariapp/ci-tools/.github/workflows/e2e-matrix-checker.yml@main
+    with:
+      service-name: ms-post
