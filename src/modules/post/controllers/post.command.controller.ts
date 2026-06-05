@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, POST_METHODS } from '@volontariapp/contracts-nest';
 import { PostService, PostEntity } from '@volontariapp/domain-post';
 import { CurrentUser } from '@volontariapp/auth';
@@ -28,7 +28,7 @@ export class PostCommandController {
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.CREATE_POST)
   async createPost(
-    data: CreatePostCommandDTO,
+    @Payload() data: CreatePostCommandDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<CreatePostResponseDTO> {
     this.logger.log(`gRPC: Creating post with title: ${data.title} by user: ${user.id}`);
@@ -41,7 +41,7 @@ export class PostCommandController {
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.UPDATE_POST)
-  async updatePost(data: UpdatePostCommandDTO): Promise<UpdatePostResponseDTO> {
+  async updatePost(@Payload() data: UpdatePostCommandDTO): Promise<UpdatePostResponseDTO> {
     const postId = data.post.id;
     if (!postId) {
       throw new Error('Post id is required for update');
@@ -60,7 +60,7 @@ export class PostCommandController {
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.DELETE_POST)
-  async deletePost(data: DeletePostCommandDTO): Promise<DeletePostResponseDTO> {
+  async deletePost(@Payload() data: DeletePostCommandDTO): Promise<DeletePostResponseDTO> {
     this.logger.log(`gRPC: Deleting post with id: ${data.id}`);
     await this.postService.delete(data.id);
     const response = new DeletePostResponseDTO();
