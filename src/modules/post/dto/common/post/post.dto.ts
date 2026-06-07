@@ -8,7 +8,7 @@ export class PostDTO implements Post {
   @IsUUID()
   id!: string;
 
-  @IsUUID()
+  @IsString()
   authorId!: string;
 
   @IsString()

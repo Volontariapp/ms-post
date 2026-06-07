@@ -1,6 +1,6 @@
 import type { GetPostQuery, ListPostsQuery } from '@volontariapp/contracts-nest';
 import { Type } from 'class-transformer';
-import { IsOptional, IsUUID, ValidateNested } from 'class-validator';
+import { IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 import { PaginationRequestDTO } from '../../common/pagination.dto.js';
 
 export class PostQueryDTO implements GetPostQuery {
@@ -15,6 +15,6 @@ export class ListPostsQueryDTO implements ListPostsQuery {
   pagination: PaginationRequestDTO | undefined;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
   authorId?: string;
 }

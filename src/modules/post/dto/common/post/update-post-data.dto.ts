@@ -7,7 +7,7 @@ export class UpdatePostDataDTO implements Partial<Post> {
   id?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
   authorId?: string;
 
   @IsOptional()
