@@ -4,11 +4,12 @@ import type { CustomConfig } from './config/base-config.js';
 import { DatabaseModule } from './providers/database/database.module.js';
 import { PostModule } from './modules/post/post.module.js';
 import { GrpcClientModule } from './grpc/grpc-client.module.js';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { GlobalExceptionFilter } from '@volontariapp/errors-nest';
 import { GrpcValidationPipe } from '@volontariapp/validation-nest';
 import { HealthModule } from '@volontariapp/health-check-nest';
 import { TerminusModule } from '@nestjs/terminus';
+import { AuthModule, GrpcInternalGuard } from '@volontariapp/auth';
 
 @Module({
   imports: [DatabaseModule, PostModule, GrpcClientModule],
@@ -25,6 +26,7 @@ export class AppModule {
           databases: ['postgres'],
           failOnMissingProvider: true,
         }),
+        AuthModule.registerMicroservice(config.auth),
         PostModule,
         GrpcClientModule,
       ],
@@ -39,6 +41,10 @@ export class AppModule {
             new GrpcValidationPipe({
               enumMaps: {},
             }),
+        },
+        {
+          provide: APP_GUARD,
+          useClass: GrpcInternalGuard,
         },
       ],
     };
