@@ -8,6 +8,8 @@ import { Logger } from '@volontariapp/logger';
 import { GetPostResponseDTO, ListPostsResponseDTO } from '../dto/response/post.response.dto.js';
 import { ListCommentsQueryDTO } from '../dto/request/query/list-comments.query.dto.js';
 import { ListCommentsResponseDTO } from '../dto/response/comment.response.dto.js';
+import { Metadata } from '@grpc/grpc-js';
+import { SocialEventPostLinkQueryClientService } from '../clients/social-event-post.query-client.js';
 
 @Controller()
 export class PostQueryController {
@@ -19,26 +21,47 @@ export class PostQueryController {
     private readonly postTransformer: PostTransformer,
     private readonly postService: PostService,
     private readonly commentService: CommentService,
+    private readonly socialEventPostClient: SocialEventPostLinkQueryClientService,
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.GET_POST)
-  async getPost(query: PostQueryDTO): Promise<GetPostResponseDTO> {
+  async getPost(query: PostQueryDTO, metadata: Metadata): Promise<GetPostResponseDTO> {
     this.logger.log(`gRPC: Getting post with id: ${query.id}`);
 
+    const token = metadata.get('x-internal-token')[0]?.toString() || '';
     const entity = await this.postService.findById(query.id);
+
+    if (token) {
+      const eventId = await this.socialEventPostClient.getEventRelatedToPost(entity.id, token);
+      if (eventId) {
+        entity.eventId = eventId;
+      }
+    }
+
     const response = new GetPostResponseDTO();
     response.post = this.postTransformer.toPostDTO(entity);
     return response;
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.LIST_POSTS)
-  async listPosts(query: ListPostsQueryDTO): Promise<ListPostsResponseDTO> {
+  async listPosts(query: ListPostsQueryDTO, metadata: Metadata): Promise<ListPostsResponseDTO> {
     this.logger.log(`gRPC: Listing posts for author: ${query.authorId ?? 'all'}`);
 
+    const token = metadata.get('x-internal-token')[0]?.toString() || '';
     const page = query.pagination?.page ?? 1;
     const limit = query.pagination?.limit ?? 10;
 
     const paginatedResult = await this.postService.listPosts(page, limit, query.authorId);
+
+    if (token && paginatedResult.data.length > 0) {
+      const postIds = paginatedResult.data.map((p) => p.id);
+      const eventIdsMap = await this.socialEventPostClient.getEventsRelatedToPosts(postIds, token);
+      for (const entity of paginatedResult.data) {
+        if (eventIdsMap[entity.id]) {
+          entity.eventId = eventIdsMap[entity.id];
+        }
+      }
+    }
 
     const response = new ListPostsResponseDTO();
     response.posts = paginatedResult.data.map((entity) => this.postTransformer.toPostDTO(entity));

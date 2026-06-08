@@ -38,6 +38,9 @@ export class PostTransformer {
     dto.content = entity.content;
     dto.createdAt = GrpcDateMapper.toTimestamp(entity.createdAt);
     dto.updatedAt = GrpcDateMapper.toTimestamp(entity.updatedAt);
+    if (entity.eventId) {
+      dto.eventId = entity.eventId;
+    }
 
     return dto;
   }

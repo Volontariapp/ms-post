@@ -26,4 +26,8 @@ export class PostDTO implements Post {
   @ValidateNested()
   @Type(() => TimestampDTO)
   updatedAt: TimestampDTO | undefined;
+
+  @IsOptional()
+  @IsString()
+  eventId?: string;
 }
