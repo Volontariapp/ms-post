@@ -8,7 +8,7 @@ import { Logger } from '@volontariapp/logger';
 import { GetPostResponseDTO, ListPostsResponseDTO } from '../dto/response/post.response.dto.js';
 import { ListCommentsQueryDTO } from '../dto/request/query/list-comments.query.dto.js';
 import { ListCommentsResponseDTO } from '../dto/response/comment.response.dto.js';
-import { Metadata } from '@grpc/grpc-js';
+import { InternalToken } from '@volontariapp/auth';
 import { SocialEventPostLinkQueryClientService } from '../clients/social-event-post.query-client.js';
 
 @Controller()
@@ -25,10 +25,12 @@ export class PostQueryController {
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.GET_POST)
-  async getPost(query: PostQueryDTO, metadata: Metadata): Promise<GetPostResponseDTO> {
+  async getPost(
+    @Payload() query: PostQueryDTO,
+    @InternalToken() token: string | undefined,
+  ): Promise<GetPostResponseDTO> {
     this.logger.log(`gRPC: Getting post with id: ${query.id}`);
 
-    const token = metadata.get('x-internal-token')[0]?.toString() || '';
     const entity = await this.postService.findById(query.id);
 
     if (token) {
@@ -44,10 +46,12 @@ export class PostQueryController {
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.LIST_POSTS)
-  async listPosts(query: ListPostsQueryDTO, metadata: Metadata): Promise<ListPostsResponseDTO> {
+  async listPosts(
+    @Payload() query: ListPostsQueryDTO,
+    @InternalToken() token: string | undefined,
+  ): Promise<ListPostsResponseDTO> {
     this.logger.log(`gRPC: Listing posts for author: ${query.authorId ?? 'all'}`);
 
-    const token = metadata.get('x-internal-token')[0]?.toString() || '';
     const page = query.pagination?.page ?? 1;
     const limit = query.pagination?.limit ?? 10;
 
