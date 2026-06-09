@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, POST_METHODS } from '@volontariapp/contracts-nest';
 import { PostService, CommentService, CommentEntity } from '@volontariapp/domain-post';
 import { PostQueryDTO, ListPostsQueryDTO } from '../dto/request/query/post.query.dto.js';
@@ -75,7 +75,7 @@ export class PostQueryController {
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, 'ListComments')
-  async listComments(query: ListCommentsQueryDTO): Promise<ListCommentsResponseDTO> {
+  async listComments(@Payload() query: ListCommentsQueryDTO): Promise<ListCommentsResponseDTO> {
     this.logger.log(`gRPC: Listing comments for post: ${query.postId}`);
 
     await this.postService.findById(query.postId);
