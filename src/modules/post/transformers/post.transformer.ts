@@ -23,6 +23,8 @@ export class PostTransformer {
     entity.title = dto.title;
     entity.content = dto.content;
     entity.authorId = authorId;
+    entity.eventId = dto.eventId;
+    this.logger.log('mapping post', dto);
     return entity;
   }
 

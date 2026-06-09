@@ -1,5 +1,5 @@
 import { CreatePostCommand } from '@volontariapp/contracts-nest';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreatePostCommandDTO implements CreatePostCommand {
   @IsString()
@@ -7,4 +7,8 @@ export class CreatePostCommandDTO implements CreatePostCommand {
 
   @IsString()
   content!: string;
+
+  @IsOptional()
+  @IsString()
+  eventId?: string;
 }
