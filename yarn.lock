@@ -662,9 +662,9 @@ __metadata:
   linkType: hard
 
 "@hapi/tlds@npm:^1.1.1":
-  version: 1.1.6
-  resolution: "@hapi/tlds@npm:1.1.6"
-  checksum: 10c0/75b2918dd10e8ba6418aadf53e6951c5fcf5b0d150cd497f257faa03492084dd9792e1cda1e41be959edf1c74602577de3d2593a44388b4caf3ad2a0c0a3da40
+  version: 1.1.7
+  resolution: "@hapi/tlds@npm:1.1.7"
+  checksum: 10c0/8429f08c83cd7d324f9b5a577442f78b2d721beba037f8a2a7f652707750800985e0f81302c4b98e9bc784717374005eb3758fb5af6dfb828c62fbb9a4f83a87
   languageName: node
   linkType: hard
 
@@ -1424,14 +1424,14 @@ __metadata:
   linkType: hard
 
 "@napi-rs/wasm-runtime@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@napi-rs/wasm-runtime@npm:1.1.4"
+  version: 1.1.5
+  resolution: "@napi-rs/wasm-runtime@npm:1.1.5"
   dependencies:
-    "@tybys/wasm-util": "npm:^0.10.1"
+    "@tybys/wasm-util": "npm:^0.10.2"
   peerDependencies:
     "@emnapi/core": ^1.7.1
     "@emnapi/runtime": ^1.7.1
-  checksum: 10c0/2e88e1955258949ccf2d18c79975821ad38071b465ef126a5e14110977b97868867b016c1ad046e963cccc42c0bd9db6c8ff5fd1ebb61b87bb3487f339041658
+  checksum: 10c0/727f2b6ae0e68bbe5d39aeb68aa6f183314e9f03dc50bb55a962849535b2db53ecc3fbf1554d8656a54488a608df5a2634670595cf5874dc4af2ee59f817c65d
   languageName: node
   linkType: hard
 
@@ -3183,7 +3183,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tybys/wasm-util@npm:^0.10.1":
+"@tybys/wasm-util@npm:^0.10.2":
   version: 0.10.2
   resolution: "@tybys/wasm-util@npm:0.10.2"
   dependencies:
@@ -4097,9 +4097,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/domain-post@npm:^3.5.3":
-  version: 3.5.3
-  resolution: "@volontariapp/domain-post@npm:3.5.3"
+"@volontariapp/domain-post@npm:^3.6.2":
+  version: 3.6.2
+  resolution: "@volontariapp/domain-post@npm:3.6.2"
   dependencies:
     "@nestjs/common": "npm:^11.0.1"
     "@volontariapp/contracts": "npm:4.2.6"
@@ -4110,7 +4110,7 @@ __metadata:
     "@volontariapp/messaging": "npm:2.8.2"
     "@volontariapp/outbox": "npm:0.9.31"
     class-transformer: "npm:^0.5.1"
-  checksum: 10c0/daff942c879060407b67ab4cf7b30419d21bd1660779362c48b4e2e2c65aa3279266a3b0d00c631ee55beabd7c8e8f2441fd68f0ff962f480620271e4807dca7
+  checksum: 10c0/045d1f11081f34e9378a5f7795cbece3b8c724170a2efb99a02ee76567a11552b5a718ddc9de6f862bb6a022b1469739b04c3f7b0972a85de47ec3ccaa06fd73
   languageName: node
   linkType: hard
 
@@ -4990,11 +4990,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.10.12":
-  version: 2.10.34
-  resolution: "baseline-browser-mapping@npm:2.10.34"
+  version: 2.10.35
+  resolution: "baseline-browser-mapping@npm:2.10.35"
   bin:
     baseline-browser-mapping: dist/cli.cjs
-  checksum: 10c0/5c29d5c053ced64a016f2977f70b87bcc85c014b425971cf8a96c14675efe4fedf13871bc7d25030c926e7cbf22959249ffe6b35d5c1e7299578fcdf4e7dc371
+  checksum: 10c0/e92c222d626293925e89c3d5b4a9359f985796e28c37d473ad55b33ef7ed5f9b26cfebbc8620df57512b66049f87120403776f2e603b1a686c469c96047db2b0
   languageName: node
   linkType: hard
 
@@ -5866,9 +5866,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.328":
-  version: 1.5.370
-  resolution: "electron-to-chromium@npm:1.5.370"
-  checksum: 10c0/0e06adee0a4a7aaa664645981bdb697ec968f63c58d553d39c947f742f6d2975d1a0cd205426fe44e87091a0407787e107ffd3f7e4b425b4da26f4763548db3c
+  version: 1.5.371
+  resolution: "electron-to-chromium@npm:1.5.371"
+  checksum: 10c0/d5d160d884f8200ef95ee9f0a2484d79b4a9f7363c908d5309ad460c79f627d5a8dd23a1288d0de1690a74bac0de34a5ca4383270c7d27231908f1b4b43287ef
   languageName: node
   linkType: hard
 
@@ -8682,7 +8682,7 @@ __metadata:
     "@volontariapp/contracts": "npm:^4.2.6"
     "@volontariapp/contracts-nest": "npm:^3.1.9"
     "@volontariapp/database": "npm:^3.3.13"
-    "@volontariapp/domain-post": "npm:^3.5.3"
+    "@volontariapp/domain-post": "npm:^3.6.2"
     "@volontariapp/errors": "npm:^0.6.0"
     "@volontariapp/errors-nest": "npm:^0.13.0"
     "@volontariapp/eslint-config": "npm:^2.2.4"
@@ -9520,8 +9520,8 @@ __metadata:
   linkType: hard
 
 "protobufjs@npm:^7.5.5, protobufjs@npm:^7.5.8":
-  version: 7.6.2
-  resolution: "protobufjs@npm:7.6.2"
+  version: 7.6.3
+  resolution: "protobufjs@npm:7.6.3"
   dependencies:
     "@protobufjs/aspromise": "npm:^1.1.2"
     "@protobufjs/base64": "npm:^1.1.2"
@@ -9535,7 +9535,7 @@ __metadata:
     "@protobufjs/utf8": "npm:^1.1.1"
     "@types/node": "npm:>=13.7.0"
     long: "npm:^5.3.2"
-  checksum: 10c0/3c552dfe3cbcfad2d6c312a76cd189cf5be9fb36b203f6292f79c6020d675f7f33d5531ce312441c42ae75deb24ced32760e64fe4aa3d5b3c2295fd67cea270c
+  checksum: 10c0/e1132b1ff82684280041550d720398568763ff40928def03e8bb409eaed6edd222e63372e3f52d7c19e5a8e9975333480e26950759086eb5a1f5b5c118da7bf8
   languageName: node
   linkType: hard
 
@@ -9933,11 +9933,11 @@ __metadata:
   linkType: hard
 
 "semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.7.2, semver@npm:^7.7.3, semver@npm:^7.8.0":
-  version: 7.8.3
-  resolution: "semver@npm:7.8.3"
+  version: 7.8.4
+  resolution: "semver@npm:7.8.4"
   bin:
     semver: bin/semver.js
-  checksum: 10c0/06d96d5b5c03acd8b0dceeae458e5d4b4ea2b6c16a2b0dfa88a0f19b91d19be1a4a192c7abfa825218c4c36c087d831b928c27d5b79a622e370bd12e95578a99
+  checksum: 10c0/81b7c296fd7927b80f67fa516b75fa1017caac8167795320de28e76ccbc6f7f01763c30ecd10d6a0d8fd089708ab0548a5aebb94b0870e99c2a2b4600a46389b
   languageName: node
   linkType: hard
 

@@ -1,10 +1,11 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, POST_METHODS } from '@volontariapp/contracts-nest';
-import { PostService, PostEntity, CommentService } from '@volontariapp/domain-post';
 import { POST_NOT_FOUND } from '@volontariapp/errors-nest';
 import { CurrentUser } from '@volontariapp/auth';
 import type { AuthUser } from '@volontariapp/auth';
+import { UserRoles } from '@volontariapp/shared';
+import { PostService, PostEntity, CommentService } from '@volontariapp/domain-post';
 import { CreatePostCommandDTO } from '../dto/request/command/create-post.command.dto.js';
 import { DeletePostCommandDTO } from '../dto/request/command/delete-post.command.dto.js';
 import { UpdatePostCommandDTO } from '../dto/request/command/update-post.command.dto.js';
@@ -49,7 +50,10 @@ export class PostCommandController {
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.UPDATE_POST)
-  async updatePost(@Payload() data: UpdatePostCommandDTO): Promise<UpdatePostResponseDTO> {
+  async updatePost(
+    @Payload() data: UpdatePostCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<UpdatePostResponseDTO> {
     const postId = data.post.id;
     if (!postId) {
       throw new Error('Post id is required for update');
@@ -61,16 +65,24 @@ export class PostCommandController {
     updateData.title = data.post.title;
     updateData.content = data.post.content;
 
-    const entity = await this.postService.update(postId, updateData);
+    const entity = await this.postService.update(
+      postId,
+      updateData,
+      user.id,
+      user.role as UserRoles,
+    );
     const response = new UpdatePostResponseDTO();
     response.post = this.postTransformer.toPostDTO(entity);
     return response;
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.DELETE_POST)
-  async deletePost(@Payload() data: DeletePostCommandDTO): Promise<DeletePostResponseDTO> {
+  async deletePost(
+    @Payload() data: DeletePostCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<DeletePostResponseDTO> {
     this.logger.log(`gRPC: Deleting post with id: ${data.id}`);
-    await this.postService.delete(data.id);
+    await this.postService.delete(data.id, user.id, user.role as UserRoles);
     const response = new DeletePostResponseDTO();
     response.success = true;
     return response;
@@ -91,7 +103,10 @@ export class PostCommandController {
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, 'DeleteComment')
-  async deleteComment(@Payload() data: DeleteCommentCommandDTO): Promise<CommentDeleteResponseDTO> {
+  async deleteComment(
+    @Payload() data: DeleteCommentCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<CommentDeleteResponseDTO> {
     this.logger.log(`gRPC: Deleting comment with id: ${data.id}`);
 
     const existing = await this.commentService.findById(data.id);
@@ -99,7 +114,7 @@ export class PostCommandController {
       throw POST_NOT_FOUND(`Comment with id ${data.id}`);
     }
 
-    await this.commentService.delete(data.id);
+    await this.commentService.delete(data.id, user.id, user.role as UserRoles);
     const response = new CommentDeleteResponseDTO();
     response.success = true;
     return response;
