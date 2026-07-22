@@ -1,71 +1,58 @@
-<!-- gitnexus:start -->
+## Domaine
 
-# 🧠 GitNexus — Code Intelligence
+ms-post gere les agregats `Post` (id, authorId, title, content, saga_status, eventId?) et `Comment`
+(id, postId, authorId, content, saga_status), definis dans le package partage `@volontariapp/domain-post`
+(npm-packages/packages/domain-post). Le service NestJS ne contient aucune logique metier propre : les
+controllers gRPC delegent tout a `PostService`/`CommentService` importes de ce package. Les entites
+TypeORM et migrations locales (src/migrations/domain) sont des copies synchronisees depuis ce package.
 
-This repository uses **GitNexus** to provide deep code understanding, impact analysis, and safe refactoring workflows. This project is indexed as **ms-post**.
+Invariants observes dans domain-post :
 
-> [!IMPORTANT]
-> If any tool warns that the index is stale, run `npx gitnexus analyze` immediately.
+- `title` a une contrainte UNIQUE en base (migration `AddUniqueConstraintToPostTitle`) -> code Postgres
+  23505 mappe vers `POST_ALREADY_EXISTS`.
+- Seul l'auteur d'un post/commentaire (ou un `UserRoles.ADMIN`) peut le modifier/supprimer, sinon
+  `ForbiddenError` (`PostService.update/delete`, `CommentService.delete`).
+- Un commentaire ne peut etre cree que si le `Post` cible existe (`CommentService.create` verifie
+  `postRepository.findById` avant insertion, sinon `POST_NOT_FOUND`).
+- Colonne `saga_status` (enum `PENDING|DONE|CANCEL`, migration `AddSagaStatusToPost`) sur `posts` et
+  `comments` : ms-post ne la met a jour lui-meme nulle part (pas de consumer BullMQ dans ce repo) ;
+  c'est le service separe `worker-post` (workers-runners/worker-post) qui consomme la queue BullMQ
+  `PostQueue.POST` et pilote ce statut de saga.
 
-## 🚀 Quick Actions
+## Evenements emis (transactional outbox)
 
-| Task                | Command / Resource                                                                           |
-| :------------------ | :------------------------------------------------------------------------------------------- |
-| **Visualize Graph** | [https://gitnexus.vercel.app/](https://gitnexus.vercel.app/) (Requires `npx gitnexus serve`) |
-| **Impact Analysis** | `npx gitnexus impact <symbol>`                                                               |
-| **Code Search**     | `npx gitnexus query "<concept>"`                                                             |
-| **Symbol Context**  | `npx gitnexus context <symbol>`                                                              |
+Emis via `EventQueueEntity.createEvent` dans la meme transaction TypeORM que l'ecriture SQL
+(`PostgresPostRepository.createWithPostCreated` / `.deleteWithPostDeleted`, table `event_queue`) :
 
-## 🛠️ Mandatory Workflows
+- `post.created` (`PostEventMessagingType.POST_CREATED`, target stream `Streams.POST_CREATED`) —
+  payload `{ postId, eventId?, userId? }`.
+- `post.deleted` (`PostEventMessagingType.POST_DELETED`, target stream `Streams.POST_DELETED`) —
+  payload `{ postId, userId? }`.
 
-### 1. Pre-Edit: Impact Analysis
+Aucun evenement consomme directement par ms-post : c'est un service gRPC command/query pur (pas de
+`BullModule`/consumer dans `app.module.ts`).
 
-**NEVER** modify a public function, class, or method without running impact analysis first.
+## gRPC expose (PostService, proto-registry/proto/volontariapp/post)
 
-- **Action**: Run `gitnexus_impact({target: "SymbolName", direction: "upstream"})`.
-- **Rule**: Report the blast radius (direct callers, affected processes) to the user before proceeding.
+Implementes dans `PostCommandController`/`PostQueryController` :
+`CreatePost`, `UpdatePost`, `DeletePost`, `CreateComment`, `DeleteComment`, `GetPost`, `ListPosts`,
+`ListComments`.
 
-### 2. Pre-Commit: Verification
+Definis dans `post.services.proto` mais **non implementes** cote ms-post (pas de handler trouve dans
+src/) : `AdminCreatePost`, `DeleteMyPosts` (seuls les DTO de reponse existent dans
+`dto/response/post.response.dto.ts`).
 
-**MUST** verify that your changes only affect the intended symbols.
+`GetPost`/`ListPosts` enrichissent la reponse via un appel gRPC sortant vers ms-social
+(`SocialEventPostLinkQueryClientService` -> `EventPostLinkQueryService.getEventRelatedToPost(s)`) pour
+resoudre `post.eventId`, uniquement si un `x-internal-token` est present.
 
-- **Action**: Run `gitnexus_detect_changes()`.
-- **Rule**: If unexpected files are impacted, investigate before committing.
+## Package partage
 
-### 3. Exploring & Refactoring
+`@volontariapp/domain-post` (source dans `npm-packages/packages/domain-post`) fournit entites, modeles
+TypeORM, repositories Postgres (avec outbox integre) et services `PostService`/`CommentService`. Toute
+evolution de regle metier doit se faire dans ce package, pas dans ms-post.
 
-- **Search**: Use `gitnexus_query` to find execution flows instead of grepping.
-- **Rename**: Use `gitnexus_rename` instead of find-and-replace to maintain graph integrity.
-
-## 📊 Impact Risk Levels
-
-| Level        | Depth | Meaning                               | Required Action            |
-| :----------- | :---: | :------------------------------------ | :------------------------- |
-| **CRITICAL** |  d=1  | Direct callers/importers will break   | Update all dependents      |
-| **HIGH**     |  d=2  | Indirect dependencies likely affected | Extensive testing required |
-| **LOW**      | d=3+  | Transitive impacts possible           | Verify critical paths      |
-
-## 🔄 Keeping the Index Fresh
-
-After major changes or commits, refresh the knowledge graph:
-
-```bash
-npx gitnexus analyze
-```
-
-_Add `--embeddings` if you need semantic search capabilities._
-
-## 📖 Skill Reference
-
-For detailed workflows, refer to the following local instruction files:
-
-- [Architecture Exploring](.claude/skills/gitnexus/gitnexus-exploring/SKILL.md)
-- [Impact Analysis](.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md)
-- [Debugging Flows](.claude/skills/gitnexus/gitnexus-debugging/SKILL.md)
-- [Safe Refactoring](.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md)
-- [CLI Guide & Wiki](.claude/skills/gitnexus/gitnexus-cli/SKILL.md)
-
-<!-- gitnexus:end -->
+---
 
 ## 🚀 RTK - Rust Token Killer (Optimized)
 
