@@ -1,0 +1,9 @@
+schema-version: v2.2
+dd-service: ms-post
+team: volontariapp
+application: volontariapp
+description: Microservice gRPC de gestion des publications, fil d'actualité et likes.
+tier: backend
+type: web
+repos:
+  - url: https://github.com/Volontariapp/ms-post
