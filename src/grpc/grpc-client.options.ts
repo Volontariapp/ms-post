@@ -1,15 +1,7 @@
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { Transport, type ClientsModuleAsyncOptions } from '@nestjs/microservices';
+import type { ClientsModuleAsyncOptions } from '@nestjs/microservices';
 import { GRPC_MICROSERVICES, getGrpcOptions } from '@volontariapp/contracts-nest';
 import { AppConfigService } from '../config/app-config.service.js';
 import { EVENT_PACKAGE, POST_PACKAGE, USER_PACKAGE, SOCIAL_PACKAGE, STORAGE_PACKAGE } from './grpc-packages.js';
-
-const contractsNestProtoRoot = join(
-  dirname(fileURLToPath(import.meta.resolve('@volontariapp/contracts-nest/package.json'))),
-  'proto',
-);
-const storageProtoPath = join(contractsNestProtoRoot, 'volontariapp/storage/storage.services.proto');
 
 export const grpcClientOptions: ClientsModuleAsyncOptions = [
   {
@@ -39,24 +31,11 @@ export const grpcClientOptions: ClientsModuleAsyncOptions = [
   {
     name: STORAGE_PACKAGE,
     inject: [AppConfigService],
-    useFactory: (configService: AppConfigService) => ({
-      transport: Transport.GRPC,
-      options: {
-        package: 'volontariapp.storage',
-        url: configService.msStorageUrl,
-        protoPath: storageProtoPath,
-        loader: {
-          keepCase: false,
-          longs: String,
-          enums: String,
-          defaults: true,
-          oneofs: true,
-          includeDirs: [contractsNestProtoRoot],
-        },
-      },
-    }),
+    useFactory: (configService: AppConfigService) =>
+      getGrpcOptions(GRPC_MICROSERVICES.STORAGE, configService.msStorageUrl),
   },
 ];
+
 
 
 
