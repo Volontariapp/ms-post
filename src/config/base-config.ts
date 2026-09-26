@@ -1,6 +1,12 @@
 import { BackendConfig, PostgresConfig, MSURLsConfig } from '@volontariapp/config';
 import { Type } from 'class-transformer';
-import { IsDefined, ValidateNested } from 'class-validator';
+import { IsDefined, IsOptional, IsString, ValidateNested } from 'class-validator';
+
+export class ExtendedMSURLsConfig extends MSURLsConfig {
+  @IsOptional()
+  @IsString()
+  msStorageUrl?: string;
+}
 
 export class CustomConfig extends BackendConfig {
   @IsDefined()
@@ -9,8 +15,8 @@ export class CustomConfig extends BackendConfig {
 
   @IsDefined()
   @ValidateNested()
-  @Type(() => MSURLsConfig)
-  declare microServices: MSURLsConfig;
+  @Type(() => ExtendedMSURLsConfig)
+  declare microServices: ExtendedMSURLsConfig;
 
   @IsDefined()
   @ValidateNested()
