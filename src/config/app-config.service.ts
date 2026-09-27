@@ -17,4 +17,9 @@ export class AppConfigService {
   get msSocialUrl() {
     return this.config.microServices.msSocialUrl;
   }
+
+  get msStorageUrl() {
+    return this.config.microServices.msStorageUrl;
+  }
 }
+

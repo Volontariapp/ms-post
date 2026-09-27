@@ -23,6 +23,8 @@ import {
   DeleteCommentResponseDTO as CommentDeleteResponseDTO,
 } from '../dto/response/comment.response.dto.js';
 
+import { StorageClientService } from '../clients/storage.client.js';
+
 @Controller()
 export class PostCommandController {
   private readonly logger = new Logger({
@@ -33,6 +35,7 @@ export class PostCommandController {
     private readonly postTransformer: PostTransformer,
     private readonly postService: PostService,
     private readonly commentService: CommentService,
+    private readonly storageClientService: StorageClientService,
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.CREATE_POST)
@@ -41,6 +44,11 @@ export class PostCommandController {
     @CurrentUser() user: AuthUser,
   ): Promise<CreatePostResponseDTO> {
     this.logger.log(`gRPC: Creating post with title: ${data.title} by user: ${user.id}`);
+
+    if (data.fileIds && data.fileIds.length > 0) {
+      await this.storageClientService.verifyFilesExist(data.fileIds);
+    }
+
     const entity = await this.postService.create(
       this.postTransformer.fromCreateCommand(data, user.id),
     );
@@ -48,6 +56,7 @@ export class PostCommandController {
     response.post = this.postTransformer.toPostDTO(entity);
     return response;
   }
+
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.UPDATE_POST)
   async updatePost(

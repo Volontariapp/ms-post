@@ -5,6 +5,7 @@ import { PostTransformer } from './transformers/index.js';
 import { PostService, CommentService, PostgresCommentRepository } from '@volontariapp/domain-post';
 import { PostgresPostRepository } from '@volontariapp/domain-post';
 import { SocialEventPostLinkQueryClientService } from './clients/social-event-post.query-client.js';
+import { StorageClientService } from './clients/storage.client.js';
 
 @Module({
   controllers: [PostCommandController, PostQueryController],
@@ -15,7 +16,9 @@ import { SocialEventPostLinkQueryClientService } from './clients/social-event-po
     CommentService,
     PostTransformer,
     SocialEventPostLinkQueryClientService,
+    StorageClientService,
   ],
-  exports: [PostService, CommentService, PostTransformer, SocialEventPostLinkQueryClientService],
+  exports: [PostService, CommentService, PostTransformer, SocialEventPostLinkQueryClientService, StorageClientService],
 })
 export class PostModule {}
+
