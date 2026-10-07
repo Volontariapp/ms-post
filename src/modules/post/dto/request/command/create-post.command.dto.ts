@@ -1,5 +1,5 @@
 import { CreatePostCommand } from '@volontariapp/contracts-nest';
-import { IsArray, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreatePostCommandDTO implements CreatePostCommand {
   @IsString()
@@ -12,9 +12,11 @@ export class CreatePostCommandDTO implements CreatePostCommand {
   @IsString()
   eventId?: string;
 
-  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
-  fileIds?: string[];
-}
+  fileIds: string[] = [];
 
+  @IsString()
+  @IsNotEmpty()
+  idempotencyKey!: string;
+}

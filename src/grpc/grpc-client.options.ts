@@ -1,7 +1,13 @@
 import type { ClientsModuleAsyncOptions } from '@nestjs/microservices';
 import { GRPC_MICROSERVICES, getGrpcOptions } from '@volontariapp/contracts-nest';
 import { AppConfigService } from '../config/app-config.service.js';
-import { EVENT_PACKAGE, POST_PACKAGE, USER_PACKAGE, SOCIAL_PACKAGE, STORAGE_PACKAGE } from './grpc-packages.js';
+import {
+  EVENT_PACKAGE,
+  POST_PACKAGE,
+  USER_PACKAGE,
+  SOCIAL_PACKAGE,
+  STORAGE_PACKAGE,
+} from './grpc-packages.js';
 
 export const grpcClientOptions: ClientsModuleAsyncOptions = [
   {
@@ -35,8 +41,3 @@ export const grpcClientOptions: ClientsModuleAsyncOptions = [
       getGrpcOptions(GRPC_MICROSERVICES.STORAGE, configService.msStorageUrl),
   },
 ];
-
-
-
-
-

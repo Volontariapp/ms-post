@@ -2,12 +2,10 @@ import { BackendConfig, PostgresConfig, MSURLsConfig } from '@volontariapp/confi
 import { Type } from 'class-transformer';
 import { IsDefined, IsString, ValidateNested } from 'class-validator';
 
-
 export class ExtendedMSURLsConfig extends MSURLsConfig {
   @IsString()
   msStorageUrl!: string;
 }
-
 
 export class CustomConfig extends BackendConfig {
   @IsDefined()

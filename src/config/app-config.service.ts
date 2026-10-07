@@ -22,4 +22,3 @@ export class AppConfigService {
     return this.config.microServices.msStorageUrl;
   }
 }
-

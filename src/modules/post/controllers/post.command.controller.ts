@@ -45,7 +45,7 @@ export class PostCommandController {
   ): Promise<CreatePostResponseDTO> {
     this.logger.log(`gRPC: Creating post with title: ${data.title} by user: ${user.id}`);
 
-    if (data.fileIds && data.fileIds.length > 0) {
+    if (data.fileIds.length > 0) {
       await this.storageClientService.verifyFilesExist(data.fileIds);
     }
 
@@ -56,7 +56,6 @@ export class PostCommandController {
     response.post = this.postTransformer.toPostDTO(entity);
     return response;
   }
-
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.UPDATE_POST)
   async updatePost(

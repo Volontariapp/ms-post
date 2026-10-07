@@ -1,7 +1,8 @@
-import { Post } from '@volontariapp/contracts-nest';
+import { Post, PostMediaStatus } from '@volontariapp/contracts-nest';
 
 import { TimestampDTO } from '../timestamp.dto.js';
-import { IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { PostMediaDTO } from './post-media.dto.js';
+import { IsArray, IsEnum, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PostDTO implements Post {
@@ -30,4 +31,12 @@ export class PostDTO implements Post {
   @IsOptional()
   @IsString()
   eventId?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PostMediaDTO)
+  media!: PostMediaDTO[];
+
+  @IsEnum(PostMediaStatus)
+  mediaStatus!: PostMediaStatus;
 }

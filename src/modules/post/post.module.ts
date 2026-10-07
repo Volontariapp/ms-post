@@ -18,7 +18,12 @@ import { StorageClientService } from './clients/storage.client.js';
     SocialEventPostLinkQueryClientService,
     StorageClientService,
   ],
-  exports: [PostService, CommentService, PostTransformer, SocialEventPostLinkQueryClientService, StorageClientService],
+  exports: [
+    PostService,
+    CommentService,
+    PostTransformer,
+    SocialEventPostLinkQueryClientService,
+    StorageClientService,
+  ],
 })
 export class PostModule {}
-
