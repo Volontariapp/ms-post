@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PostCommandController } from '../post.command.controller.js';
 import {
   PostService,
@@ -15,7 +16,7 @@ import {
 } from '@volontariapp/contracts-nest';
 import { NotFoundError, InternalServerError } from '@volontariapp/errors';
 import type { AuthUser } from '@volontariapp/auth';
-import { CreatePostCommandDTO } from '../../dto/request/command/create-post.command.dto.js';
+import type { CreatePostCommandDTO } from '../../dto/request/command/create-post.command.dto.js';
 import { v5 as uuidv5 } from 'uuid';
 import { AppConfigService } from '../../../../config/app-config.service.js';
 
@@ -24,9 +25,7 @@ const TEST_POST_NAMESPACE = 'a2d04a60-9d04-4e4b-97e3-0d3f23c7c2b5';
 describe('PostCommandController', () => {
   let controller: PostCommandController;
   let postService: PostService;
-  let commentService: CommentService;
   let storageClientService: StorageClientService;
-  let postTransformer: PostTransformer;
 
   const mockUser: AuthUser = {
     id: '11111111-1111-1111-1111-111111111111',
@@ -71,9 +70,7 @@ describe('PostCommandController', () => {
 
     controller = module.get<PostCommandController>(PostCommandController);
     postService = module.get<PostService>(PostService);
-    commentService = module.get<CommentService>(CommentService);
     storageClientService = module.get<StorageClientService>(StorageClientService);
-    postTransformer = module.get<PostTransformer>(PostTransformer);
   });
 
   afterEach(() => {
@@ -243,12 +240,13 @@ describe('PostCommandController', () => {
 
       const expectedPostId = uuidv5(`${mockUser.id}:${dto.idempotencyKey}`, TEST_POST_NAMESPACE);
 
-      jest
+      const storageSpy = jest
         .spyOn(storageClientService, 'confirmPostAttachment')
         .mockRejectedValue(new NotFoundError(`File with id ${fileId} not found`));
       const createSpy = jest.spyOn(postService, 'create');
 
       await expect(controller.createPost(dto, mockUser)).rejects.toThrow();
+      expect(storageSpy).toHaveBeenCalledWith(expectedPostId, [fileId]);
       expect(createSpy).not.toHaveBeenCalled();
     });
   });
