@@ -24,6 +24,7 @@ function resolveConfigDirectory(): string {
 
 async function bootstrap() {
   const appConfig = loadConfig(resolveConfigDirectory(), CustomConfig);
+  Logger.setDefaultConfig({ format: appConfig.logger.format });
   const logger = new Logger({
     context: 'MS-POST',
     format: appConfig.logger.format,
