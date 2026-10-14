@@ -31,7 +31,7 @@ export class PostQueryController {
   ): Promise<GetPostResponseDTO> {
     this.logger.log(`gRPC: Getting post with id: ${query.id}`);
 
-    const entity = await this.postService.findById(query.id);
+    const entity = await this.postService.findById(query.id, undefined, ['media']);
 
     if (token) {
       const eventId = await this.socialEventPostClient.getEventRelatedToPost(entity.id, token);

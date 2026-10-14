@@ -23,5 +23,6 @@
     "msWsUrl": "localhost:5005",
     "msStorageUrl": "localhost:5006"
   },
-  "port": 3002
+  "port": 3002,
+  "postIdNamespace": "a2d04a60-9d04-4e4b-97e3-0d3f23c7c2b5"
 }

@@ -4,9 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresBridgeModule } from '@volontariapp/bridge-nest';
 import type { PostgresConfig } from '@volontariapp/config';
 import { EventQueueModel, JobsOutboxModel } from '@volontariapp/database';
-import { PostModel, CommentModel } from '@volontariapp/domain-post';
+import { PostModel, CommentModel, PostMediaModel } from '@volontariapp/domain-post';
 
-const entities = [PostModel, CommentModel, EventQueueModel, JobsOutboxModel];
+const entities = [PostModel, CommentModel, PostMediaModel, EventQueueModel, JobsOutboxModel];
 
 @Module({})
 export class DatabaseModule {

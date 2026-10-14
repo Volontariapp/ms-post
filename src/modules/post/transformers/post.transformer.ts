@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Logger } from '@volontariapp/logger';
-import { GrpcDateMapper } from '@volontariapp/contracts-nest';
-import { PostEntity } from '@volontariapp/domain-post';
+import {
+  GrpcDateMapper,
+  PostMediaStatus as ContractsPostMediaStatus,
+} from '@volontariapp/contracts-nest';
+import { PostEntity, PostMediaStatus } from '@volontariapp/domain-post';
 import { PostDTO } from '../dto/common/post/post.dto.js';
+import { PostMediaDTO } from '../dto/common/post/post-media.dto.js';
 import { CreatePostCommandDTO } from '../dto/request/command/create-post.command.dto.js';
 import { CreateCommentCommandDTO } from '../dto/request/command/create-comment.command.dto.js';
 import { CommentEntity } from '@volontariapp/domain-post';
@@ -15,11 +19,14 @@ export class PostTransformer {
   /**
    * CreatePostCommandDTO → PostEntity
    */
-  fromCreateCommand(dto: CreatePostCommandDTO, authorId: string): PostEntity {
+  fromCreateCommand(dto: CreatePostCommandDTO, authorId: string, id?: string): PostEntity {
     const entity = new PostEntity();
 
     this.logger.debug(`Mapping CreatePostCommandDTO: ${JSON.stringify(dto)}`);
 
+    if (id) {
+      entity.id = id;
+    }
     entity.title = dto.title;
     entity.content = dto.content;
     entity.authorId = authorId;
@@ -42,6 +49,31 @@ export class PostTransformer {
     dto.updatedAt = GrpcDateMapper.toTimestamp(entity.updatedAt);
     if (entity.eventId) {
       dto.eventId = entity.eventId;
+    }
+
+    dto.media = (entity.media ?? []).map((m) => {
+      const mediaDto = new PostMediaDTO();
+      mediaDto.fileId = m.fileId;
+      mediaDto.position = m.position;
+      return mediaDto;
+    });
+
+    switch (entity.media_status) {
+      case PostMediaStatus.NONE:
+        dto.mediaStatus = ContractsPostMediaStatus.POST_MEDIA_STATUS_NONE;
+        break;
+      case PostMediaStatus.PENDING:
+        dto.mediaStatus = ContractsPostMediaStatus.POST_MEDIA_STATUS_PENDING;
+        break;
+      case PostMediaStatus.READY:
+        dto.mediaStatus = ContractsPostMediaStatus.POST_MEDIA_STATUS_READY;
+        break;
+      case PostMediaStatus.REJECTED:
+        dto.mediaStatus = ContractsPostMediaStatus.POST_MEDIA_STATUS_REJECTED;
+        break;
+      default:
+        dto.mediaStatus = ContractsPostMediaStatus.POST_MEDIA_STATUS_NONE;
+        break;
     }
 
     return dto;

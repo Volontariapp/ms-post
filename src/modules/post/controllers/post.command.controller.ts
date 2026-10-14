@@ -1,11 +1,20 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
-import { GRPC_SERVICES, POST_METHODS } from '@volontariapp/contracts-nest';
+import { GRPC_SERVICES, POST_METHODS, ScanStatus } from '@volontariapp/contracts-nest';
 import { POST_NOT_FOUND } from '@volontariapp/errors-nest';
 import { CurrentUser } from '@volontariapp/auth';
 import type { AuthUser } from '@volontariapp/auth';
 import { UserRoles } from '@volontariapp/shared';
-import { PostService, PostEntity, CommentService } from '@volontariapp/domain-post';
+import {
+  PostService,
+  PostEntity,
+  CommentService,
+  PostMediaStatus,
+  PostMediaScanStatus,
+} from '@volontariapp/domain-post';
+import { isBaseError } from '@volontariapp/errors';
+import { StorageClientService, isGrpcError } from '@volontariapp/storage-client';
+import { v5 as uuidv5 } from 'uuid';
 import { CreatePostCommandDTO } from '../dto/request/command/create-post.command.dto.js';
 import { DeletePostCommandDTO } from '../dto/request/command/delete-post.command.dto.js';
 import { UpdatePostCommandDTO } from '../dto/request/command/update-post.command.dto.js';
@@ -22,8 +31,7 @@ import {
   CreateCommentResponseDTO,
   DeleteCommentResponseDTO as CommentDeleteResponseDTO,
 } from '../dto/response/comment.response.dto.js';
-
-import { StorageClientService } from '../clients/storage.client.js';
+import { AppConfigService } from '../../../config/app-config.service.js';
 
 @Controller()
 export class PostCommandController {
@@ -36,6 +44,7 @@ export class PostCommandController {
     private readonly postService: PostService,
     private readonly commentService: CommentService,
     private readonly storageClientService: StorageClientService,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.CREATE_POST)
@@ -43,18 +52,91 @@ export class PostCommandController {
     @Payload() data: CreatePostCommandDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<CreatePostResponseDTO> {
-    this.logger.log(`gRPC: Creating post with title: ${data.title} by user: ${user.id}`);
+    const postId = uuidv5(
+      `${user.id}:${data.idempotencyKey}`,
+      this.appConfigService.postIdNamespace,
+    );
+    this.logger.log(
+      `gRPC: Creating post with id: ${postId}, title: ${data.title} by user: ${user.id}`,
+    );
+
+    let fileScanStatuses: Record<string, PostMediaScanStatus> | undefined;
+    let mediaStatus = PostMediaStatus.NONE;
 
     if (data.fileIds.length > 0) {
-      await this.storageClientService.verifyFilesExist(data.fileIds);
+      try {
+        const response = await this.storageClientService.confirmPostAttachment(
+          postId,
+          data.fileIds,
+        );
+        fileScanStatuses = {};
+        for (const file of response.files) {
+          fileScanStatuses[file.id] = this.mapScanStatus(file.scanStatus);
+        }
+      } catch (error: unknown) {
+        if (this.isStorageUnavailable(error)) {
+          this.logger.warn(
+            `ms-storage unavailable for post ${postId}, falling back asynchronously with media_status=PENDING: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+          mediaStatus = PostMediaStatus.PENDING;
+        } else {
+          this.logger.error(`Failed to confirm file attachment for post ${postId}`, error as Error);
+          throw error;
+        }
+      }
     }
 
-    const entity = await this.postService.create(
-      this.postTransformer.fromCreateCommand(data, user.id),
+    const postEntity = this.postTransformer.fromCreateCommand(data, user.id, postId);
+    postEntity.id = postId;
+    const createdEntity = await this.postService.create(
+      Object.assign(postEntity, {
+        fileIds: data.fileIds,
+        fileScanStatuses,
+        media_status: mediaStatus,
+      }),
     );
+
     const response = new CreatePostResponseDTO();
-    response.post = this.postTransformer.toPostDTO(entity);
+    response.post = this.postTransformer.toPostDTO(createdEntity);
     return response;
+  }
+
+  private isStorageUnavailable(error: unknown): boolean {
+    if (isBaseError(error)) {
+      if (error.code === 'STORAGE_TIMEOUT') return true;
+      if (error.code === 'STORAGE_ATTACHMENT_FAILED') {
+        const details = error.details as { reason?: string } | undefined;
+        const reason = details?.reason?.toUpperCase() ?? '';
+        if (
+          reason.includes('UNAVAILABLE') ||
+          reason.includes('DEADLINE_EXCEEDED') ||
+          reason.includes('CONNECT ECONNREFUSED')
+        ) {
+          return true;
+        }
+      }
+    }
+    if (isGrpcError(error)) {
+      if (error.code === 14 || error.code === 4) return true;
+    }
+    return false;
+  }
+
+  private mapScanStatus(status: ScanStatus): PostMediaScanStatus {
+    switch (status) {
+      case ScanStatus.SCAN_STATUS_CLEAN:
+        return PostMediaScanStatus.CLEAN;
+      case ScanStatus.SCAN_STATUS_REJECTED:
+        return PostMediaScanStatus.REJECTED;
+      case ScanStatus.SCAN_STATUS_SCANNING:
+        return PostMediaScanStatus.SCANNING;
+      case ScanStatus.SCAN_STATUS_AWAITING_UPLOAD:
+      case ScanStatus.SCAN_STATUS_UNSPECIFIED:
+      default:
+        return PostMediaScanStatus.AWAITING_UPLOAD;
+    }
   }
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.UPDATE_POST)

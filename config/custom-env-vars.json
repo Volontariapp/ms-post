@@ -23,5 +23,6 @@
     "msSocialUrl": "MS_SOCIAL_URL",
     "msWsUrl": "MS_WS_URL",
     "msStorageUrl": "MS_STORAGE_URL"
-  }
+  },
+  "postIdNamespace": "POST_ID_NAMESPACE"
 }
