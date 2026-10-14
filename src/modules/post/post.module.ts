@@ -6,19 +6,16 @@ import { PostService, CommentService, PostgresCommentRepository } from '@volonta
 import { PostgresPostRepository } from '@volontariapp/domain-post';
 import { SocialEventPostLinkQueryClientService } from './clients/social-event-post.query-client.js';
 import { StorageClientModule } from '@volontariapp/storage-client';
-import { AppConfigService } from '../../config/app-config.service.js';
+import {
+  StorageClientConfigModule,
+  StorageClientConfigService,
+} from './storage-client-config.module.js';
 
 @Module({
   imports: [
     StorageClientModule.registerAsync({
-      inject: [AppConfigService],
-      useFactory: (rawConfig: unknown) => {
-        const config = rawConfig as AppConfigService;
-        return {
-          url: config.msStorageUrl,
-          timeoutMs: 2000,
-        };
-      },
+      imports: [StorageClientConfigModule],
+      useExisting: StorageClientConfigService,
     }),
   ],
   controllers: [PostCommandController, PostQueryController],
