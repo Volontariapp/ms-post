@@ -1,6 +1,6 @@
 import { BackendConfig, PostgresConfig, MSURLsConfig } from '@volontariapp/config';
 import { Type } from 'class-transformer';
-import { IsDefined, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsDefined, IsString, IsUUID, ValidateNested } from 'class-validator';
 
 export class ExtendedMSURLsConfig extends MSURLsConfig {
   @IsString()
@@ -22,7 +22,7 @@ export class CustomConfig extends BackendConfig {
   @Type(() => PostgresConfig)
   db!: PostgresConfig;
 
-  @IsOptional()
+  @IsDefined()
   @IsUUID()
-  postIdNamespace?: string;
+  postIdNamespace!: string;
 }

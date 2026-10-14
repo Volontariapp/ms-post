@@ -23,6 +23,6 @@ export class AppConfigService {
   }
 
   get postIdNamespace(): string {
-    return this.config.postIdNamespace ?? 'a2d04a60-9d04-4e4b-97e3-0d3f23c7c2b5';
+    return this.config.postIdNamespace;
   }
 }
