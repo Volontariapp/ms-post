@@ -1,6 +1,6 @@
 {
-  "api-gateway": "feat/storage-event-integration",
-  "ms-event": "feat/storage-event-integration",
+  "api-gateway": "main",
+  "ms-event": "main",
   "ms-user": "main",
   "ms-social": "main",
   "ms-storage": "main"
