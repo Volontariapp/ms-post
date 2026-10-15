@@ -13,7 +13,7 @@ export class CreatePostCommandDTO implements CreatePostCommand {
   eventId?: string;
 
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsUUID('all', { each: true })
   fileIds: string[] = [];
 
   @IsString()

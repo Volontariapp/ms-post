@@ -4,7 +4,7 @@ import { IsOptional, IsUUID, ValidateNested } from 'class-validator';
 import { PaginationRequestDTO } from '../../common/pagination.dto.js';
 
 export class ListCommentsQueryDTO implements ListCommentsQuery {
-  @IsUUID(4)
+  @IsUUID()
   postId!: string;
 
   @IsOptional()
