@@ -8,7 +8,8 @@ import { Logger } from '@volontariapp/logger';
 import { GetPostResponseDTO, ListPostsResponseDTO } from '../dto/response/post.response.dto.js';
 import { ListCommentsQueryDTO } from '../dto/request/query/list-comments.query.dto.js';
 import { ListCommentsResponseDTO } from '../dto/response/comment.response.dto.js';
-import { InternalToken } from '@volontariapp/auth';
+import { CurrentUser, InternalToken } from '@volontariapp/auth';
+import type { AuthUser } from '@volontariapp/auth';
 import { SocialEventPostLinkQueryClientService } from '../clients/social-event-post.query-client.js';
 
 @Controller()
@@ -28,10 +29,12 @@ export class PostQueryController {
   async getPost(
     @Payload() query: PostQueryDTO,
     @InternalToken() token: string | undefined,
+    @CurrentUser() user: AuthUser | undefined,
   ): Promise<GetPostResponseDTO> {
     this.logger.log(`gRPC: Getting post with id: ${query.id}`);
 
-    const entity = await this.postService.findById(query.id, undefined, ['media']);
+    // The reader id lets an author read their own post while its media is still PENDING.
+    const entity = await this.postService.findById(query.id, user?.id, ['media']);
 
     if (token) {
       const eventId = await this.socialEventPostClient.getEventRelatedToPost(entity.id, token);
@@ -49,13 +52,14 @@ export class PostQueryController {
   async listPosts(
     @Payload() query: ListPostsQueryDTO,
     @InternalToken() token: string | undefined,
+    @CurrentUser() user: AuthUser | undefined,
   ): Promise<ListPostsResponseDTO> {
     this.logger.log(`gRPC: Listing posts for author: ${query.authorId ?? 'all'}`);
 
     const page = query.pagination?.page ?? 1;
     const limit = query.pagination?.limit ?? 10;
 
-    const paginatedResult = await this.postService.listPosts(page, limit, query.authorId);
+    const paginatedResult = await this.postService.listPosts(page, limit, query.authorId, user?.id);
 
     if (token && paginatedResult.data.length > 0) {
       const postIds = paginatedResult.data.map((p) => p.id);
