@@ -12,6 +12,7 @@ import {
   PostMediaStatus,
 } from '@volontariapp/domain-post';
 import { SagaStatus } from '@volontariapp/shared';
+import type { ScanStatusOnWire } from '../post.command.controller.js';
 import type { CreatePostCommandDTO } from '../../dto/request/command/create-post.command.dto.js';
 
 export class PostCommandFactory {
@@ -46,6 +47,21 @@ export class PostCommandFactory {
 
   static createConfirmResponse(files: FileMetadata[]): ConfirmFileAttachmentResponse {
     return { success: true, updatedCount: files.length, files };
+  }
+
+  /**
+   * Reponse telle que le client gRPC la decode (`enums: String` dans getGrpcOptions) :
+   * le statut de scan est un nom ('SCAN_STATUS_CLEAN'), pas le nombre des types generes.
+   */
+  static createConfirmResponseOnWire(
+    files: { id: string; scanStatus: ScanStatusOnWire }[],
+  ): ConfirmFileAttachmentResponse {
+    const metadata = files.map((file) =>
+      Object.assign(PostCommandFactory.createFileMetadata({ id: file.id }), {
+        scanStatus: file.scanStatus,
+      }),
+    );
+    return { success: true, updatedCount: metadata.length, files: metadata };
   }
 
   static createPostEntity(overrides: Partial<PostEntity> = {}): PostEntity {

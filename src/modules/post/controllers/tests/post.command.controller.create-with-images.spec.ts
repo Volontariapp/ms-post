@@ -85,6 +85,40 @@ describe('PostCommandController.createPost with images', () => {
     });
   });
 
+  describe('scan status of the files, as delivered by the gRPC client', () => {
+    const fileId = '22222222-2222-2222-2222-222222222222';
+
+    it.each([
+      [ScanStatus.SCAN_STATUS_CLEAN, PostMediaScanStatus.CLEAN],
+      [ScanStatus.SCAN_STATUS_SCANNING, PostMediaScanStatus.SCANNING],
+      [ScanStatus.SCAN_STATUS_REJECTED, PostMediaScanStatus.REJECTED],
+      ['SCAN_STATUS_CLEAN', PostMediaScanStatus.CLEAN],
+      ['SCAN_STATUS_SCANNING', PostMediaScanStatus.SCANNING],
+      ['SCAN_STATUS_REJECTED', PostMediaScanStatus.REJECTED],
+      ['SCAN_STATUS_AWAITING_UPLOAD', PostMediaScanStatus.AWAITING_UPLOAD],
+      ['SCAN_STATUS_UNSPECIFIED', PostMediaScanStatus.AWAITING_UPLOAD],
+    ] as const)('hands the domain the scan status for %s', async (scanStatus, expected) => {
+      const dto = PostCommandFactory.createCommand({
+        fileIds: [fileId],
+        idempotencyKey: `k-scan-${String(scanStatus)}`,
+      });
+      jest
+        .spyOn(storageClientService, 'confirmPostAttachment')
+        .mockResolvedValue(
+          PostCommandFactory.createConfirmResponseOnWire([{ id: fileId, scanStatus }]),
+        );
+      const createSpy = jest
+        .spyOn(postService, 'create')
+        .mockResolvedValue(PostCommandFactory.createPostEntity({ authorId: user.id }));
+
+      await controller.createPost(dto, user);
+
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ fileScanStatuses: { [fileId]: expected } }),
+      );
+    });
+  });
+
   describe('internal token propagation to ms-storage', () => {
     it('forwards the caller internal token with the reservation', async () => {
       const fileId = '22222222-2222-2222-2222-222222222222';
