@@ -33,6 +33,9 @@ import {
 } from '../dto/response/comment.response.dto.js';
 import { AppConfigService } from '../../../config/app-config.service.js';
 
+/** Statut de scan tel que le client gRPC le livre : nombre (types generes) ou nom (`enums: String`). */
+export type ScanStatusOnWire = ScanStatus | keyof typeof ScanStatus;
+
 @Controller()
 export class PostCommandController {
   private readonly logger = new Logger({
@@ -120,16 +123,22 @@ export class PostCommandController {
     return response;
   }
 
-  private mapScanStatus(status: ScanStatus): PostMediaScanStatus {
+  /**
+   * `getGrpcOptions` charge les protos avec `enums: String` : le statut recu de ms-storage est un
+   * nom ('SCAN_STATUS_CLEAN') meme si les types generes le declarent numerique. Les deux formes
+   * sont acceptees ; un statut inconnu n'est jamais pris pour un fichier propre.
+   */
+  private mapScanStatus(status: ScanStatusOnWire): PostMediaScanStatus {
     switch (status) {
       case ScanStatus.SCAN_STATUS_CLEAN:
+      case 'SCAN_STATUS_CLEAN':
         return PostMediaScanStatus.CLEAN;
       case ScanStatus.SCAN_STATUS_REJECTED:
+      case 'SCAN_STATUS_REJECTED':
         return PostMediaScanStatus.REJECTED;
       case ScanStatus.SCAN_STATUS_SCANNING:
+      case 'SCAN_STATUS_SCANNING':
         return PostMediaScanStatus.SCANNING;
-      case ScanStatus.SCAN_STATUS_AWAITING_UPLOAD:
-      case ScanStatus.SCAN_STATUS_UNSPECIFIED:
       default:
         return PostMediaScanStatus.AWAITING_UPLOAD;
     }
