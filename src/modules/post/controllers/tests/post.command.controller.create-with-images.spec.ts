@@ -16,19 +16,19 @@ import {
   STORAGE_ATTACHMENT_FAILED,
   STORAGE_TIMEOUT,
 } from '@volontariapp/storage-client';
-import { GrpcStatus } from '@volontariapp/errors';
+import { GrpcStatus, InternalServerError } from '@volontariapp/errors';
 import { ScanStatus } from '@volontariapp/contracts-nest';
 import type { AuthUser } from '@volontariapp/auth';
 import { AppConfigService } from '../../../../config/app-config.service.js';
 import { v5 as uuidv5 } from 'uuid';
-import { CreatePostFactory } from './create-post.factory.js';
+import { PostCommandFactory } from './post-command.factory.js';
 import {
   TEST_POST_NAMESPACE,
   createMockAppConfigService,
   createMockCommentService,
   createMockPostService,
   createMockStorageClientService,
-} from './create-post.mock.js';
+} from './post-command.mock.js';
 
 describe('PostCommandController.createPost with images', () => {
   let controller: PostCommandController;
@@ -61,10 +61,13 @@ describe('PostCommandController.createPost with images', () => {
   describe('media status handed to the domain once the reservation succeeded', () => {
     it('does not force NONE when every file is CLEAN, so the domain can resolve READY', async () => {
       const fileId = '22222222-2222-2222-2222-222222222222';
-      const dto = CreatePostFactory.createCommand({ fileIds: [fileId], idempotencyKey: 'k-clean' });
+      const dto = PostCommandFactory.createCommand({
+        fileIds: [fileId],
+        idempotencyKey: 'k-clean',
+      });
       jest.spyOn(storageClientService, 'confirmPostAttachment').mockResolvedValue(
-        CreatePostFactory.createConfirmResponse([
-          CreatePostFactory.createFileMetadata({
+        PostCommandFactory.createConfirmResponse([
+          PostCommandFactory.createFileMetadata({
             id: fileId,
             scanStatus: ScanStatus.SCAN_STATUS_CLEAN,
           }),
@@ -72,7 +75,7 @@ describe('PostCommandController.createPost with images', () => {
       );
       const createSpy = jest
         .spyOn(postService, 'create')
-        .mockResolvedValue(CreatePostFactory.createPostEntity({ authorId: user.id }));
+        .mockResolvedValue(PostCommandFactory.createPostEntity({ authorId: user.id }));
 
       await controller.createPost(dto, user);
 
@@ -84,18 +87,21 @@ describe('PostCommandController.createPost with images', () => {
   describe('internal token propagation to ms-storage', () => {
     it('forwards the caller internal token with the reservation', async () => {
       const fileId = '22222222-2222-2222-2222-222222222222';
-      const dto = CreatePostFactory.createCommand({ fileIds: [fileId], idempotencyKey: 'k-token' });
+      const dto = PostCommandFactory.createCommand({
+        fileIds: [fileId],
+        idempotencyKey: 'k-token',
+      });
       const postId = uuidv5(`${user.id}:${dto.idempotencyKey}`, TEST_POST_NAMESPACE);
       const storageSpy = jest
         .spyOn(storageClientService, 'confirmPostAttachment')
         .mockResolvedValue(
-          CreatePostFactory.createConfirmResponse([
-            CreatePostFactory.createFileMetadata({ id: fileId }),
+          PostCommandFactory.createConfirmResponse([
+            PostCommandFactory.createFileMetadata({ id: fileId }),
           ]),
         );
       jest
         .spyOn(postService, 'create')
-        .mockResolvedValue(CreatePostFactory.createPostEntity({ authorId: user.id }));
+        .mockResolvedValue(PostCommandFactory.createPostEntity({ authorId: user.id }));
 
       await controller.createPost(dto, user, 'internal-token-abc');
 
@@ -108,10 +114,10 @@ describe('PostCommandController.createPost with images', () => {
   describe('files still being scanned', () => {
     it('hands the SCANNING status to the domain without forcing NONE', async () => {
       const fileId = '55555555-5555-5555-5555-555555555555';
-      const dto = CreatePostFactory.createCommand({ fileIds: [fileId], idempotencyKey: 'k-scan' });
+      const dto = PostCommandFactory.createCommand({ fileIds: [fileId], idempotencyKey: 'k-scan' });
       jest.spyOn(storageClientService, 'confirmPostAttachment').mockResolvedValue(
-        CreatePostFactory.createConfirmResponse([
-          CreatePostFactory.createFileMetadata({
+        PostCommandFactory.createConfirmResponse([
+          PostCommandFactory.createFileMetadata({
             id: fileId,
             scanStatus: ScanStatus.SCAN_STATUS_SCANNING,
           }),
@@ -119,7 +125,7 @@ describe('PostCommandController.createPost with images', () => {
       );
       const createSpy = jest
         .spyOn(postService, 'create')
-        .mockResolvedValue(CreatePostFactory.createPostEntity({ authorId: user.id }));
+        .mockResolvedValue(PostCommandFactory.createPostEntity({ authorId: user.id }));
 
       await controller.createPost(dto, user);
 
@@ -137,11 +143,11 @@ describe('PostCommandController.createPost with images', () => {
       ['a gRPC UNAVAILABLE', STORAGE_ATTACHMENT_FAILED('entity', 'UNAVAILABLE: no connection')],
       ['a gRPC DEADLINE_EXCEEDED', STORAGE_ATTACHMENT_FAILED('entity', 'DEADLINE_EXCEEDED: late')],
     ])('creates the post as PENDING after %s', async (_label, storageError) => {
-      const dto = CreatePostFactory.createCommand({ fileIds: [fileId], idempotencyKey: 'k-down' });
+      const dto = PostCommandFactory.createCommand({ fileIds: [fileId], idempotencyKey: 'k-down' });
       jest.spyOn(storageClientService, 'confirmPostAttachment').mockRejectedValue(storageError);
       const createSpy = jest
         .spyOn(postService, 'create')
-        .mockResolvedValue(CreatePostFactory.createPostEntity({ authorId: user.id }));
+        .mockResolvedValue(PostCommandFactory.createPostEntity({ authorId: user.id }));
 
       await controller.createPost(dto, user);
 
@@ -165,7 +171,7 @@ describe('PostCommandController.createPost with images', () => {
       ],
       ['an invalid attachment', INVALID_FILE_ATTACHMENT('wrong entity type')],
     ])('never falls back to async attachment on %s', async (_label, storageError) => {
-      const dto = CreatePostFactory.createCommand({
+      const dto = PostCommandFactory.createCommand({
         fileIds: [fileId],
         idempotencyKey: 'k-refuse',
       });
@@ -179,10 +185,10 @@ describe('PostCommandController.createPost with images', () => {
 
   describe('idempotent creation', () => {
     it('derives the same post id from the same owner and idempotency key', async () => {
-      const dto = CreatePostFactory.createCommand({ idempotencyKey: 'k-retry' });
+      const dto = PostCommandFactory.createCommand({ idempotencyKey: 'k-retry' });
       const createSpy = jest
         .spyOn(postService, 'create')
-        .mockResolvedValue(CreatePostFactory.createPostEntity({ authorId: user.id }));
+        .mockResolvedValue(PostCommandFactory.createPostEntity({ authorId: user.id }));
 
       await controller.createPost(dto, user);
       await controller.createPost(dto, user);
@@ -191,6 +197,31 @@ describe('PostCommandController.createPost with images', () => {
       const secondId = createSpy.mock.calls[1]?.[0].id;
       expect(firstId).toBe(uuidv5(`${user.id}:k-retry`, TEST_POST_NAMESPACE));
       expect(secondId).toBe(firstId);
+    });
+
+    it('rethrows a domain failure unchanged instead of reporting the post as already existing', async () => {
+      const dto = PostCommandFactory.createCommand({ idempotencyKey: 'k-lost-row' });
+      const domainError = new InternalServerError(
+        'Post with id p failed to insert but was not found',
+        'DATABASE_ERROR',
+      );
+      jest.spyOn(postService, 'create').mockRejectedValue(domainError);
+
+      await expect(controller.createPost(dto, user)).rejects.toBe(domainError);
+    });
+
+    it('returns the existing post on a retry without raising POST_ALREADY_EXISTS', async () => {
+      const dto = PostCommandFactory.createCommand({ idempotencyKey: 'k-replay' });
+      const postId = uuidv5(`${user.id}:${dto.idempotencyKey}`, TEST_POST_NAMESPACE);
+      jest
+        .spyOn(postService, 'create')
+        .mockResolvedValue(PostCommandFactory.createPostEntity({ id: postId, authorId: user.id }));
+
+      const first = await controller.createPost(dto, user);
+      const second = await controller.createPost(dto, user);
+
+      expect(second.post?.id).toBe(postId);
+      expect(second.post?.id).toBe(first.post?.id);
     });
   });
 });

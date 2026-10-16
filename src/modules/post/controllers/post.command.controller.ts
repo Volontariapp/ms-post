@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, POST_METHODS, ScanStatus } from '@volontariapp/contracts-nest';
-import { POST_NOT_FOUND, POST_ALREADY_EXISTS } from '@volontariapp/errors-nest';
+import { POST_NOT_FOUND } from '@volontariapp/errors-nest';
 import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import type { AuthUser } from '@volontariapp/auth';
 import { UserRoles } from '@volontariapp/shared';
@@ -12,7 +12,6 @@ import {
   PostMediaStatus,
   PostMediaScanStatus,
 } from '@volontariapp/domain-post';
-import { isBaseError } from '@volontariapp/errors';
 import { StorageClientService, isStorageUnavailable } from '@volontariapp/storage-client';
 import { v5 as uuidv5 } from 'uuid';
 import { CreatePostCommandDTO } from '../dto/request/command/create-post.command.dto.js';
@@ -62,6 +61,7 @@ export class PostCommandController {
     );
 
     let fileScanStatuses: Record<string, PostMediaScanStatus> | undefined;
+    // undefined lets domain-post resolve READY, PENDING or REJECTED from fileScanStatuses
     let mediaStatus: PostMediaStatus | undefined =
       data.fileIds.length === 0 ? PostMediaStatus.NONE : undefined;
 
@@ -84,7 +84,10 @@ export class PostCommandController {
           );
           mediaStatus = PostMediaStatus.PENDING;
         } else {
-          this.logger.error(`Failed to confirm file attachment for post ${postId}: ${reason}`);
+          this.logger.error(
+            `Failed to confirm file attachment for post ${postId}: ${reason}`,
+            error,
+          );
           throw error;
         }
       }
@@ -92,21 +95,13 @@ export class PostCommandController {
 
     const postEntity = this.postTransformer.fromCreateCommand(data, user.id, postId);
     postEntity.id = postId;
-    let createdEntity: PostEntity;
-    try {
-      createdEntity = await this.postService.create(
-        Object.assign(postEntity, {
-          fileIds: data.fileIds,
-          fileScanStatuses,
-          media_status: mediaStatus,
-        }),
-      );
-    } catch (error: unknown) {
-      if (isBaseError(error) && error.message.includes('failed to insert but was not found')) {
-        throw POST_ALREADY_EXISTS(data.title);
-      }
-      throw error;
-    }
+    const createdEntity: PostEntity = await this.postService.create(
+      Object.assign(postEntity, {
+        fileIds: data.fileIds,
+        fileScanStatuses,
+        media_status: mediaStatus,
+      }),
+    );
 
     const response = new CreatePostResponseDTO();
     response.post = this.postTransformer.toPostDTO(createdEntity);

@@ -5,11 +5,16 @@ import {
   type ConfirmFileAttachmentResponse,
   type FileMetadata,
 } from '@volontariapp/contracts-nest';
-import { PostEntity, PostMediaStatus } from '@volontariapp/domain-post';
+import {
+  PostEntity,
+  PostMediaEntity,
+  PostMediaScanStatus,
+  PostMediaStatus,
+} from '@volontariapp/domain-post';
 import { SagaStatus } from '@volontariapp/shared';
 import type { CreatePostCommandDTO } from '../../dto/request/command/create-post.command.dto.js';
 
-export class CreatePostFactory {
+export class PostCommandFactory {
   static createCommand(overrides: Partial<CreatePostCommandDTO> = {}): CreatePostCommandDTO {
     return {
       title: overrides.title ?? 'Post Title',
@@ -54,6 +59,19 @@ export class CreatePostFactory {
     post.media = overrides.media ?? [];
     post.createdAt = overrides.createdAt ?? new Date();
     post.updatedAt = overrides.updatedAt ?? new Date();
+    if (overrides.eventId) {
+      post.eventId = overrides.eventId;
+    }
     return post;
+  }
+
+  static createPostMedia(overrides: Partial<PostMediaEntity> = {}): PostMediaEntity {
+    const media = new PostMediaEntity();
+    media.id = overrides.id ?? 'default-media-id';
+    media.postId = overrides.postId ?? 'default-post-id';
+    media.fileId = overrides.fileId ?? 'default-file-id';
+    media.position = overrides.position ?? 0;
+    media.scanStatus = overrides.scanStatus ?? PostMediaScanStatus.CLEAN;
+    return media;
   }
 }

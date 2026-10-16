@@ -4,8 +4,6 @@ import { PostCommandController } from '../post.command.controller.js';
 import {
   PostService,
   CommentService,
-  PostEntity,
-  PostMediaEntity,
   PostMediaStatus,
   PostMediaScanStatus,
 } from '@volontariapp/domain-post';
@@ -14,86 +12,22 @@ import { StorageClientService } from '@volontariapp/storage-client';
 import {
   FileStatus,
   ScanStatus,
-  ValidationMode,
   PostMediaStatus as ContractsPostMediaStatus,
-  type FileMetadata,
   type ConfirmFileAttachmentResponse,
 } from '@volontariapp/contracts-nest';
 import { NotFoundError, InternalServerError } from '@volontariapp/errors';
-import { SagaStatus } from '@volontariapp/shared';
 import type { AuthUser } from '@volontariapp/auth';
 import type { CreatePostCommandDTO } from '../../dto/request/command/create-post.command.dto.js';
 import { v5 as uuidv5 } from 'uuid';
 import { AppConfigService } from '../../../../config/app-config.service.js';
-
-const TEST_POST_NAMESPACE = 'a2d04a60-9d04-4e4b-97e3-0d3f23c7c2b5';
-
-interface MockPostService {
-  create: jest.Mock;
-  update: jest.Mock;
-  delete: jest.Mock;
-}
-
-interface MockCommentService {
-  create: jest.Mock;
-  delete: jest.Mock;
-  findById: jest.Mock;
-}
-
-interface MockStorageClientService {
-  confirmPostAttachment: jest.Mock;
-}
-
-interface MockAppConfigService {
-  postIdNamespace: string;
-}
-
-function createMockFileMetadata(overrides: Partial<FileMetadata> = {}): FileMetadata {
-  return {
-    id: overrides.id ?? 'default-file-id',
-    ownerId: overrides.ownerId ?? 'default-owner-id',
-    objectKey: overrides.objectKey ?? 'post/file.webp',
-    mimeType: overrides.mimeType ?? 'image/jpeg',
-    status: overrides.status ?? FileStatus.FILE_STATUS_ATTACHED,
-    validationMode: overrides.validationMode ?? ValidationMode.VALIDATION_MODE_SYNC,
-    isPublic: overrides.isPublic ?? true,
-    uploadExpiresAt: overrides.uploadExpiresAt,
-    createdAt: overrides.createdAt,
-    updatedAt: overrides.updatedAt,
-    scanStatus: overrides.scanStatus ?? ScanStatus.SCAN_STATUS_CLEAN,
-    rejectionReason: overrides.rejectionReason,
-    publicUrl: overrides.publicUrl,
-    entityType: overrides.entityType,
-    entityId: overrides.entityId,
-  };
-}
-
-function createMockPostMedia(overrides: Partial<PostMediaEntity> = {}): PostMediaEntity {
-  const media = new PostMediaEntity();
-  media.id = overrides.id ?? 'default-media-id';
-  media.postId = overrides.postId ?? 'default-post-id';
-  media.fileId = overrides.fileId ?? 'default-file-id';
-  media.position = overrides.position ?? 0;
-  media.scanStatus = overrides.scanStatus ?? PostMediaScanStatus.CLEAN;
-  return media;
-}
-
-function createMockPost(overrides: Partial<PostEntity> = {}): PostEntity {
-  const post = new PostEntity();
-  post.id = overrides.id ?? 'default-post-id';
-  post.authorId = overrides.authorId ?? 'default-author-id';
-  post.title = overrides.title ?? 'default-title';
-  post.content = overrides.content ?? 'default-content';
-  post.saga_status = overrides.saga_status ?? SagaStatus.PENDING;
-  post.media_status = overrides.media_status ?? PostMediaStatus.NONE;
-  post.media = overrides.media ?? [];
-  post.createdAt = overrides.createdAt ?? new Date();
-  post.updatedAt = overrides.updatedAt ?? new Date();
-  if (overrides.eventId) {
-    post.eventId = overrides.eventId;
-  }
-  return post;
-}
+import { PostCommandFactory } from './post-command.factory.js';
+import {
+  TEST_POST_NAMESPACE,
+  createMockAppConfigService,
+  createMockCommentService,
+  createMockPostService,
+  createMockStorageClientService,
+} from './post-command.mock.js';
 
 describe('PostCommandController', () => {
   let controller: PostCommandController;
@@ -105,26 +39,6 @@ describe('PostCommandController', () => {
     role: 'USER',
   };
 
-  const mockPostService: MockPostService = {
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  };
-
-  const mockCommentService: MockCommentService = {
-    create: jest.fn(),
-    delete: jest.fn(),
-    findById: jest.fn(),
-  };
-
-  const mockStorageClientService: MockStorageClientService = {
-    confirmPostAttachment: jest.fn(),
-  };
-
-  const mockAppConfigService: MockAppConfigService = {
-    postIdNamespace: TEST_POST_NAMESPACE,
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostCommandController],
@@ -132,19 +46,19 @@ describe('PostCommandController', () => {
         PostTransformer,
         {
           provide: PostService,
-          useValue: mockPostService,
+          useValue: createMockPostService(),
         },
         {
           provide: CommentService,
-          useValue: mockCommentService,
+          useValue: createMockCommentService(),
         },
         {
           provide: StorageClientService,
-          useValue: mockStorageClientService,
+          useValue: createMockStorageClientService(),
         },
         {
           provide: AppConfigService,
-          useValue: mockAppConfigService,
+          useValue: createMockAppConfigService(),
         },
       ],
     }).compile();
@@ -155,7 +69,7 @@ describe('PostCommandController', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('createPost', () => {
@@ -169,7 +83,7 @@ describe('PostCommandController', () => {
 
       const expectedPostId = uuidv5(`${mockUser.id}:${dto.idempotencyKey}`, TEST_POST_NAMESPACE);
 
-      const createdEntity = createMockPost({
+      const createdEntity = PostCommandFactory.createPostEntity({
         id: expectedPostId,
         title: dto.title,
         content: dto.content,
@@ -211,14 +125,14 @@ describe('PostCommandController', () => {
 
       const expectedPostId = uuidv5(`${mockUser.id}:${dto.idempotencyKey}`, TEST_POST_NAMESPACE);
 
-      const createdEntity = createMockPost({
+      const createdEntity = PostCommandFactory.createPostEntity({
         id: expectedPostId,
         title: dto.title,
         content: dto.content,
         authorId: mockUser.id,
         media_status: PostMediaStatus.READY,
         media: [
-          createMockPostMedia({
+          PostCommandFactory.createPostMedia({
             id: 'media-1',
             postId: expectedPostId,
             fileId,
@@ -232,7 +146,7 @@ describe('PostCommandController', () => {
         success: true,
         updatedCount: 1,
         files: [
-          createMockFileMetadata({
+          PostCommandFactory.createFileMetadata({
             id: fileId,
             ownerId: mockUser.id,
             status: FileStatus.FILE_STATUS_ATTACHED,
@@ -276,7 +190,7 @@ describe('PostCommandController', () => {
 
       const expectedPostId = uuidv5(`${mockUser.id}:${dto.idempotencyKey}`, TEST_POST_NAMESPACE);
 
-      const createdEntity = createMockPost({
+      const createdEntity = PostCommandFactory.createPostEntity({
         id: expectedPostId,
         title: dto.title,
         content: dto.content,
