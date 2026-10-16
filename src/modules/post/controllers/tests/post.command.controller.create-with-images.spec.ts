@@ -16,7 +16,8 @@ import {
   STORAGE_ATTACHMENT_FAILED,
   STORAGE_TIMEOUT,
 } from '@volontariapp/storage-client';
-import { GrpcStatus, InternalServerError } from '@volontariapp/errors';
+import { ConflictError, GrpcStatus } from '@volontariapp/errors';
+import { DATABASE_ERROR } from '@volontariapp/errors-nest';
 import { ScanStatus } from '@volontariapp/contracts-nest';
 import type { AuthUser } from '@volontariapp/auth';
 import { AppConfigService } from '../../../../config/app-config.service.js';
@@ -199,15 +200,23 @@ describe('PostCommandController.createPost with images', () => {
       expect(secondId).toBe(firstId);
     });
 
-    it('rethrows a domain failure unchanged instead of reporting the post as already existing', async () => {
-      const dto = PostCommandFactory.createCommand({ idempotencyKey: 'k-lost-row' });
-      const domainError = new InternalServerError(
+    it('reports a conflict when the domain loses the row it just failed to insert (duplicate title)', async () => {
+      const dto = PostCommandFactory.createCommand({ idempotencyKey: 'k-duplicate-title' });
+      const wrappedByDomain = DATABASE_ERROR(
+        'creating post',
         'Post with id p failed to insert but was not found',
-        'DATABASE_ERROR',
       );
-      jest.spyOn(postService, 'create').mockRejectedValue(domainError);
+      jest.spyOn(postService, 'create').mockRejectedValue(wrappedByDomain);
 
-      await expect(controller.createPost(dto, user)).rejects.toBe(domainError);
+      await expect(controller.createPost(dto, user)).rejects.toBeInstanceOf(ConflictError);
+    });
+
+    it('rethrows any other domain failure unchanged', async () => {
+      const dto = PostCommandFactory.createCommand({ idempotencyKey: 'k-other-failure' });
+      const unrelated = DATABASE_ERROR('creating post', 'connection reset');
+      jest.spyOn(postService, 'create').mockRejectedValue(unrelated);
+
+      await expect(controller.createPost(dto, user)).rejects.toBe(unrelated);
     });
 
     it('returns the existing post on a retry without raising POST_ALREADY_EXISTS', async () => {

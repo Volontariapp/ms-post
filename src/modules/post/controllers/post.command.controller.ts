@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, POST_METHODS, ScanStatus } from '@volontariapp/contracts-nest';
-import { POST_NOT_FOUND } from '@volontariapp/errors-nest';
+import { POST_NOT_FOUND, POST_ALREADY_EXISTS } from '@volontariapp/errors-nest';
 import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import type { AuthUser } from '@volontariapp/auth';
 import { UserRoles } from '@volontariapp/shared';
@@ -12,6 +12,7 @@ import {
   PostMediaStatus,
   PostMediaScanStatus,
 } from '@volontariapp/domain-post';
+import { isBaseError } from '@volontariapp/errors';
 import { StorageClientService, isStorageUnavailable } from '@volontariapp/storage-client';
 import { v5 as uuidv5 } from 'uuid';
 import { CreatePostCommandDTO } from '../dto/request/command/create-post.command.dto.js';
@@ -95,13 +96,24 @@ export class PostCommandController {
 
     const postEntity = this.postTransformer.fromCreateCommand(data, user.id, postId);
     postEntity.id = postId;
-    const createdEntity: PostEntity = await this.postService.create(
-      Object.assign(postEntity, {
-        fileIds: data.fileIds,
-        fileScanStatuses,
-        media_status: mediaStatus,
-      }),
-    );
+    let createdEntity: PostEntity;
+    try {
+      createdEntity = await this.postService.create(
+        Object.assign(postEntity, {
+          fileIds: data.fileIds,
+          fileScanStatuses,
+          media_status: mediaStatus,
+        }),
+      );
+    } catch (error: unknown) {
+      // The repository throws a plain Error when ON CONFLICT DO NOTHING hit another constraint
+      // (duplicate title) and no row exists for this id. PostService wraps it in a DATABASE_ERROR
+      // that still carries the text, so it is matched here to answer 409 instead of 500.
+      if (isBaseError(error) && error.message.includes('failed to insert but was not found')) {
+        throw POST_ALREADY_EXISTS(data.title);
+      }
+      throw error;
+    }
 
     const response = new CreatePostResponseDTO();
     response.post = this.postTransformer.toPostDTO(createdEntity);
