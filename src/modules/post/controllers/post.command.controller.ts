@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, POST_METHODS, ScanStatus } from '@volontariapp/contracts-nest';
 import { POST_NOT_FOUND, POST_ALREADY_EXISTS } from '@volontariapp/errors-nest';
-import { CurrentUser } from '@volontariapp/auth';
+import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import type { AuthUser } from '@volontariapp/auth';
 import { UserRoles } from '@volontariapp/shared';
 import {
@@ -13,7 +13,7 @@ import {
   PostMediaScanStatus,
 } from '@volontariapp/domain-post';
 import { isBaseError } from '@volontariapp/errors';
-import { StorageClientService, isGrpcError } from '@volontariapp/storage-client';
+import { StorageClientService, isStorageUnavailable } from '@volontariapp/storage-client';
 import { v5 as uuidv5 } from 'uuid';
 import { CreatePostCommandDTO } from '../dto/request/command/create-post.command.dto.js';
 import { DeletePostCommandDTO } from '../dto/request/command/delete-post.command.dto.js';
@@ -51,6 +51,7 @@ export class PostCommandController {
   async createPost(
     @Payload() data: CreatePostCommandDTO,
     @CurrentUser() user: AuthUser,
+    @InternalToken() internalToken?: string,
   ): Promise<CreatePostResponseDTO> {
     const postId = uuidv5(
       `${user.id}:${data.idempotencyKey}`,
@@ -61,28 +62,33 @@ export class PostCommandController {
     );
 
     let fileScanStatuses: Record<string, PostMediaScanStatus> | undefined;
-    let mediaStatus = PostMediaStatus.NONE;
+    // undefined lets domain-post resolve READY, PENDING or REJECTED from fileScanStatuses
+    let mediaStatus: PostMediaStatus | undefined =
+      data.fileIds.length === 0 ? PostMediaStatus.NONE : undefined;
 
     if (data.fileIds.length > 0) {
       try {
         const response = await this.storageClientService.confirmPostAttachment(
           postId,
           data.fileIds,
+          internalToken ? { internalToken } : undefined,
         );
         fileScanStatuses = {};
         for (const file of response.files) {
           fileScanStatuses[file.id] = this.mapScanStatus(file.scanStatus);
         }
       } catch (error: unknown) {
-        if (this.isStorageUnavailable(error)) {
+        const reason = error instanceof Error ? error.message : String(error);
+        if (isStorageUnavailable(error)) {
           this.logger.warn(
-            `ms-storage unavailable for post ${postId}, falling back asynchronously with media_status=PENDING: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
+            `ms-storage unavailable for post ${postId}, falling back asynchronously with media_status=PENDING: ${reason}`,
           );
           mediaStatus = PostMediaStatus.PENDING;
         } else {
-          this.logger.error(`Failed to confirm file attachment for post ${postId}`, error as Error);
+          this.logger.error(
+            `Failed to confirm file attachment for post ${postId}: ${reason}`,
+            error,
+          );
           throw error;
         }
       }
@@ -100,6 +106,9 @@ export class PostCommandController {
         }),
       );
     } catch (error: unknown) {
+      // The repository throws a plain Error when ON CONFLICT DO NOTHING hit another constraint
+      // (duplicate title) and no row exists for this id. PostService wraps it in a DATABASE_ERROR
+      // that still carries the text, so it is matched here to answer 409 instead of 500.
       if (isBaseError(error) && error.message.includes('failed to insert but was not found')) {
         throw POST_ALREADY_EXISTS(data.title);
       }
@@ -109,27 +118,6 @@ export class PostCommandController {
     const response = new CreatePostResponseDTO();
     response.post = this.postTransformer.toPostDTO(createdEntity);
     return response;
-  }
-
-  private isStorageUnavailable(error: unknown): boolean {
-    if (isBaseError(error)) {
-      if (error.code === 'STORAGE_TIMEOUT') return true;
-      if (error.code === 'STORAGE_ATTACHMENT_FAILED') {
-        const details = error.details as { reason?: string } | undefined;
-        const reason = details?.reason?.toUpperCase() ?? '';
-        if (
-          reason.includes('UNAVAILABLE') ||
-          reason.includes('DEADLINE_EXCEEDED') ||
-          reason.includes('CONNECT ECONNREFUSED')
-        ) {
-          return true;
-        }
-      }
-    }
-    if (isGrpcError(error)) {
-      if (error.code === 14 || error.code === 4) return true;
-    }
-    return false;
   }
 
   private mapScanStatus(status: ScanStatus): PostMediaScanStatus {
