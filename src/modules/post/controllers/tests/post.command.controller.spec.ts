@@ -248,7 +248,7 @@ describe('PostCommandController', () => {
 
       const result = await controller.createPost(dto, mockUser);
 
-      expect(storageSpy).toHaveBeenCalledWith(expectedPostId, [fileId]);
+      expect(storageSpy).toHaveBeenCalledWith(expectedPostId, [fileId], undefined);
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expectedPostId,
@@ -294,7 +294,7 @@ describe('PostCommandController', () => {
 
       const result = await controller.createPost(dto, mockUser);
 
-      expect(storageSpy).toHaveBeenCalledWith(expectedPostId, [fileId]);
+      expect(storageSpy).toHaveBeenCalledWith(expectedPostId, [fileId], undefined);
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expectedPostId,
@@ -324,7 +324,7 @@ describe('PostCommandController', () => {
       const createSpy = jest.spyOn(postService, 'create');
 
       await expect(controller.createPost(dto, mockUser)).rejects.toThrow();
-      expect(storageSpy).toHaveBeenCalledWith(expectedPostId, [fileId]);
+      expect(storageSpy).toHaveBeenCalledWith(expectedPostId, [fileId], undefined);
       expect(createSpy).not.toHaveBeenCalled();
     });
   });

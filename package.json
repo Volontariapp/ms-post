@@ -58,7 +58,7 @@
     "@volontariapp/health-check-nest": "^0.1.41",
     "@volontariapp/logger": "^0.4.0",
     "@volontariapp/monitoring": "^2.2.2",
-    "@volontariapp/storage-client": "^0.2.0",
+    "@volontariapp/storage-client": "^0.3.0",
     "@volontariapp/validation-nest": "^0.1.5",
     "axios": "^1.7.9",
     "class-transformer": "^0.5.1",
