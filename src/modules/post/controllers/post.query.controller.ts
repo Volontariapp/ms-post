@@ -1,13 +1,29 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
-import { GRPC_SERVICES, POST_METHODS } from '@volontariapp/contracts-nest';
+import { GRPC_SERVICES, GrpcDateMapper, POST_METHODS } from '@volontariapp/contracts-nest';
 import { PostService, CommentService, CommentEntity } from '@volontariapp/domain-post';
-import { PostQueryDTO, ListPostsQueryDTO } from '../dto/request/query/post.query.dto.js';
+import {
+  PostQueryDTO,
+  ListPostsQueryDTO,
+  ListRecentPostsByAuthorsQueryDTO,
+  ListPostsByIdsQueryDTO,
+} from '../dto/request/query/post.query.dto.js';
 import { PostTransformer } from '../transformers/index.js';
 import { Logger } from '@volontariapp/logger';
-import { GetPostResponseDTO, ListPostsResponseDTO } from '../dto/response/post.response.dto.js';
-import { ListCommentsQueryDTO } from '../dto/request/query/list-comments.query.dto.js';
-import { ListCommentsResponseDTO } from '../dto/response/comment.response.dto.js';
+import {
+  GetPostResponseDTO,
+  ListPostsResponseDTO,
+  ListRecentPostsByAuthorsResponseDTO,
+  ListPostsByIdsResponseDTO,
+} from '../dto/response/post.response.dto.js';
+import {
+  ListCommentsQueryDTO,
+  ListCommentsByAuthorQueryDTO,
+} from '../dto/request/query/list-comments.query.dto.js';
+import {
+  ListCommentsResponseDTO,
+  ListCommentsByAuthorResponseDTO,
+} from '../dto/response/comment.response.dto.js';
 import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import type { AuthUser } from '@volontariapp/auth';
 import { SocialEventPostLinkQueryClientService } from '../clients/social-event-post.query-client.js';
@@ -107,6 +123,65 @@ export class PostQueryController {
       total: paginatedResult.total,
       totalPages: Math.ceil(paginatedResult.total / paginatedResult.limit),
     };
+    return response;
+  }
+
+  /**
+   * Ranking read: recent visible posts of the given authors (or of everyone), newest first.
+   * No event enrichment on purpose: this read stays a single query for the ranking workers.
+   */
+  @GrpcMethod(GRPC_SERVICES.POST_SERVICE, 'ListRecentPostsByAuthors')
+  async listRecentPostsByAuthors(
+    @Payload() query: ListRecentPostsByAuthorsQueryDTO,
+  ): Promise<ListRecentPostsByAuthorsResponseDTO> {
+    this.logger.log(
+      `gRPC: Listing recent posts for ${query.allAuthors ? 'all authors' : `${String(query.authorIds.length)} authors`}`,
+    );
+
+    const entities = await this.postService.listRecentByAuthors({
+      authorIds: query.authorIds,
+      allAuthors: query.allAuthors,
+      since: GrpcDateMapper.toDate(query.since),
+      perAuthorLimit: query.perAuthorLimit,
+      limit: query.limit,
+    });
+
+    const response = new ListRecentPostsByAuthorsResponseDTO();
+    response.posts = entities.map((entity) => this.postTransformer.toPostDTO(entity));
+    return response;
+  }
+
+  /** Ranking read: the visible posts among the given ids. Absent ids are ignored, never an error. */
+  @GrpcMethod(GRPC_SERVICES.POST_SERVICE, 'ListPostsByIds')
+  async listPostsByIds(
+    @Payload() query: ListPostsByIdsQueryDTO,
+  ): Promise<ListPostsByIdsResponseDTO> {
+    this.logger.log(`gRPC: Listing posts by ${String(query.ids.length)} ids`);
+
+    const entities = await this.postService.listByIds(query.ids);
+
+    const response = new ListPostsByIdsResponseDTO();
+    response.posts = entities.map((entity) => this.postTransformer.toPostDTO(entity));
+    return response;
+  }
+
+  /** Ranking read: recent comments of an author, newest first. */
+  @GrpcMethod(GRPC_SERVICES.POST_SERVICE, 'ListCommentsByAuthor')
+  async listCommentsByAuthor(
+    @Payload() query: ListCommentsByAuthorQueryDTO,
+  ): Promise<ListCommentsByAuthorResponseDTO> {
+    this.logger.log(`gRPC: Listing comments of author: ${query.authorId}`);
+
+    const entities = await this.commentService.listByAuthor(
+      query.authorId,
+      GrpcDateMapper.toDate(query.since),
+      query.limit,
+    );
+
+    const response = new ListCommentsByAuthorResponseDTO();
+    response.comments = entities.map((entity: CommentEntity) =>
+      this.postTransformer.toCommentDTO(entity),
+    );
     return response;
   }
 }
