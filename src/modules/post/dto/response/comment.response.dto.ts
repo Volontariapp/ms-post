@@ -1,6 +1,7 @@
 import type {
   CreateCommentResponse,
   ListCommentsResponse,
+  ListCommentsByAuthorResponse,
   DeleteCommentResponse,
   PaginationResponse,
 } from '@volontariapp/contracts-nest';
@@ -17,4 +18,8 @@ export class ListCommentsResponseDTO implements ListCommentsResponse {
 
 export class DeleteCommentResponseDTO implements DeleteCommentResponse {
   success!: boolean;
+}
+
+export class ListCommentsByAuthorResponseDTO implements ListCommentsByAuthorResponse {
+  comments!: CommentDTO[];
 }

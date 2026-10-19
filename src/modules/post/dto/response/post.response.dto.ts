@@ -4,6 +4,8 @@ import type {
   AdminCreatePostResponse,
   UpdatePostResponse,
   ListPostsResponse,
+  ListRecentPostsByAuthorsResponse,
+  ListPostsByIdsResponse,
   DeletePostResponse,
   DeleteMyPostsResponse,
   PaginationResponse,
@@ -37,4 +39,12 @@ export class DeletePostResponseDTO implements DeletePostResponse {
 
 export class DeleteMyPostsResponseDTO implements DeleteMyPostsResponse {
   success!: boolean;
+}
+
+export class ListRecentPostsByAuthorsResponseDTO implements ListRecentPostsByAuthorsResponse {
+  posts!: PostDTO[];
+}
+
+export class ListPostsByIdsResponseDTO implements ListPostsByIdsResponse {
+  posts!: PostDTO[];
 }
