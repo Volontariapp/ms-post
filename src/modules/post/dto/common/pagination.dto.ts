@@ -7,7 +7,7 @@ import { IsInt, Max, Min } from 'class-validator';
  * 1000 et non 100: la gateway appelle certains ms avec limit 1000.
  * A abaisser plus tard une fois ces appelants migres.
  */
-export const MAX_PAGINATION_LIMIT = 1000;
+export const MAX_PAGINATION_LIMIT = 100;
 
 export class PaginationRequestDTO implements PaginationRequest {
   @IsInt()
