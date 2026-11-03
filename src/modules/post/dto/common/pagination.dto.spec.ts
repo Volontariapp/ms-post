@@ -14,13 +14,13 @@ describe('PaginationRequestDTO', () => {
     jest.restoreAllMocks();
   });
 
-  it('expose un plafond de 1000', () => {
-    expect(MAX_PAGINATION_LIMIT).toBe(1000);
+  it('expose un plafond de 100', () => {
+    expect(MAX_PAGINATION_LIMIT).toBe(100);
   });
 
   it.each([
     [1, 10],
-    [1, 1000],
+    [1, 100],
     [3, 1],
   ])('accepte page=%d limit=%d', async (page, limit) => {
     await expect(errorsFor(page, limit)).resolves.toEqual([]);
