@@ -6,6 +6,7 @@ import { PostService, CommentService, PostgresCommentRepository } from '@volonta
 import { PostgresPostRepository } from '@volontariapp/domain-post';
 import { SocialEventPostLinkQueryClientService } from './clients/social-event-post.query-client.js';
 import { PostsTotalCache } from './providers/posts-total-cache.provider.js';
+import { PostEventLinksCache } from './providers/post-event-links-cache.provider.js';
 import { CacheStatsModule } from '../../common/cache/cache-stats.module.js';
 import { CacheStatsReporter } from '../../common/cache/cache-stats.reporter.js';
 import { StorageClientModule } from '@volontariapp/storage-client';
@@ -35,6 +36,15 @@ import {
       inject: [CacheStatsReporter],
       useFactory: (reporter: CacheStatsReporter): PostsTotalCache => {
         const cache = new PostsTotalCache();
+        reporter.register(cache);
+        return cache;
+      },
+    },
+    {
+      provide: PostEventLinksCache,
+      inject: [CacheStatsReporter],
+      useFactory: (reporter: CacheStatsReporter): PostEventLinksCache => {
+        const cache = new PostEventLinksCache();
         reporter.register(cache);
         return cache;
       },

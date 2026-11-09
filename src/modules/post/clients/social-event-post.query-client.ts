@@ -12,6 +12,7 @@ import {
 import { firstValueFrom, Observable } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 import { Logger } from '@volontariapp/logger';
+import { PostEventLinksCache } from '../providers/post-event-links-cache.provider.js';
 
 interface QueryServiceWithMetadata extends EventPostLinkQueryServiceClient {
   getEventRelatedToPost(
@@ -29,7 +30,10 @@ export class SocialEventPostLinkQueryClientService implements OnModuleInit {
   private readonly logger = new Logger({ context: SocialEventPostLinkQueryClientService.name });
   private queryService!: QueryServiceWithMetadata;
 
-  constructor(@Inject(SOCIAL_PACKAGE) private readonly client: ClientGrpc) {}
+  constructor(
+    @Inject(SOCIAL_PACKAGE) private readonly client: ClientGrpc,
+    private readonly linksCache: PostEventLinksCache,
+  ) {}
 
   onModuleInit() {
     this.queryService = this.client.getService<EventPostLinkQueryServiceClient>(
@@ -58,10 +62,22 @@ export class SocialEventPostLinkQueryClientService implements OnModuleInit {
     }
   }
 
+  /**
+   * Links of the given posts. Served from the per-pod links cache; only the posts missing from
+   * it are asked to ms-social. On an ms-social error, only the cached links are returned.
+   */
   async getEventsRelatedToPosts(postIds: string[], token: string): Promise<Record<string, string>> {
-    this.logger.debug(`Calling getEventsRelatedToPosts for ${String(postIds.length)} posts`);
     if (postIds.length === 0) return {};
+    return this.linksCache.resolve(postIds, (missing) =>
+      this.fetchEventsRelatedToPosts(missing, token),
+    );
+  }
 
+  private async fetchEventsRelatedToPosts(
+    postIds: string[],
+    token: string,
+  ): Promise<Record<string, string> | undefined> {
+    this.logger.debug(`Calling getEventsRelatedToPosts for ${String(postIds.length)} posts`);
     const request: GetEventsRelatedToPostsQuery = { postIds };
 
     const outboundMetadata = new Metadata();
@@ -81,7 +97,7 @@ export class SocialEventPostLinkQueryClientService implements OnModuleInit {
       return map;
     } catch (err) {
       this.logger.error(`Error fetching related events for batch posts`, err as Error);
-      return {};
+      return undefined;
     }
   }
 }
