@@ -27,6 +27,7 @@ import {
 import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import type { AuthUser } from '@volontariapp/auth';
 import { SocialEventPostLinkQueryClientService } from '../clients/social-event-post.query-client.js';
+import { PostsTotalCache } from '../providers/posts-total-cache.provider.js';
 
 @Controller()
 export class PostQueryController {
@@ -39,6 +40,7 @@ export class PostQueryController {
     private readonly postService: PostService,
     private readonly commentService: CommentService,
     private readonly socialEventPostClient: SocialEventPostLinkQueryClientService,
+    private readonly postsTotalCache: PostsTotalCache,
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, POST_METHODS.GET_POST)
@@ -75,7 +77,17 @@ export class PostQueryController {
     const page = query.pagination?.page ?? 1;
     const limit = query.pagination?.limit ?? 10;
 
-    const paginatedResult = await this.postService.listPosts(page, limit, query.authorId, user?.id);
+    const cacheKey = PostsTotalCache.buildKey(query.authorId, user?.id);
+    const knownTotal = this.postsTotalCache.get(cacheKey);
+
+    const paginatedResult =
+      knownTotal === undefined
+        ? await this.postService.listPosts(page, limit, query.authorId, user?.id)
+        : await this.postService.listPosts(page, limit, query.authorId, user?.id, { knownTotal });
+
+    if (knownTotal === undefined) {
+      this.postsTotalCache.set(cacheKey, paginatedResult.total);
+    }
 
     if (token && paginatedResult.data.length > 0) {
       const postIds = paginatedResult.data.map((p) => p.id);
