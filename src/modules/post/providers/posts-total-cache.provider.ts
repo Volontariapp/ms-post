@@ -1,11 +1,6 @@
-import type { CacheStats, CacheStatsSource } from '../../../common/cache/cache-stats.js';
+import { BoundedTtlCache, type CacheClock } from '../../../common/cache/bounded-ttl-cache.js';
 
-export type PostsTotalClock = () => number;
-
-interface PostsTotalEntry {
-  readonly total: number;
-  readonly expiresAt: number;
-}
+export type PostsTotalClock = CacheClock;
 
 export const POSTS_TOTAL_CACHE_TTL_MS = 10_000;
 export const POSTS_TOTAL_CACHE_CAPACITY = 2000;
@@ -14,19 +9,15 @@ export const POSTS_TOTAL_CACHE_CAPACITY = 2000;
  * Bounded TTL cache of the posts-list total (the COUNT is the costly part of a page).
  * The oldest entry is evicted first once the capacity is reached.
  */
-export class PostsTotalCache implements CacheStatsSource {
-  private readonly entries = new Map<string, PostsTotalEntry>();
-  // Plain counters, reset by the stats reporter every minute.
-  private hits = 0;
-  private misses = 0;
-  private evictions = 0;
-
+export class PostsTotalCache extends BoundedTtlCache<number> {
   constructor(
-    private readonly now: PostsTotalClock = Date.now,
-    private readonly ttlMs: number = POSTS_TOTAL_CACHE_TTL_MS,
-    private readonly capacity: number = POSTS_TOTAL_CACHE_CAPACITY,
-    private readonly name: string = 'posts-total',
-  ) {}
+    now: PostsTotalClock = Date.now,
+    ttlMs: number = POSTS_TOTAL_CACHE_TTL_MS,
+    capacity: number = POSTS_TOTAL_CACHE_CAPACITY,
+    name = 'posts-total',
+  ) {
+    super(now, ttlMs, capacity, name);
+  }
 
   /**
    * The count depends on the reader: own posts with pending media are visible to their
@@ -40,54 +31,5 @@ export class PostsTotalCache implements CacheStatsSource {
       mode = `reader:${readerId}`;
     }
     return `${authorId ?? '*'}|${mode}`;
-  }
-
-  get(key: string): number | undefined {
-    const entry = this.entries.get(key);
-    if (entry === undefined) {
-      this.misses++;
-      return undefined;
-    }
-    if (entry.expiresAt <= this.now()) {
-      this.entries.delete(key);
-      this.misses++;
-      return undefined;
-    }
-    this.hits++;
-    return entry.total;
-  }
-
-  set(key: string, total: number): void {
-    this.entries.delete(key);
-    while (this.entries.size >= this.capacity) {
-      const oldest = this.entries.keys().next();
-      if (oldest.done === true) {
-        break;
-      }
-      this.entries.delete(oldest.value);
-      this.evictions++;
-    }
-    this.entries.set(key, { total, expiresAt: this.now() + this.ttlMs });
-  }
-
-  get size(): number {
-    return this.entries.size;
-  }
-
-  stats(): CacheStats {
-    return {
-      name: this.name,
-      hits: this.hits,
-      misses: this.misses,
-      evictions: this.evictions,
-      size: this.entries.size,
-      capacity: this.capacity,
-    };
-  }
-
-  resetStats(): void {
-    this.hits = 0;
-    this.misses = 0;
-    this.evictions = 0;
   }
 }
