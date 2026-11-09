@@ -49,7 +49,7 @@ export class PostQueryController {
     @InternalToken() token: string | undefined,
     @CurrentUser() user: AuthUser | undefined,
   ): Promise<GetPostResponseDTO> {
-    this.logger.log(`gRPC: Getting post with id: ${query.id}`);
+    this.logger.debug(`gRPC: Getting post with id: ${query.id}`);
 
     // The reader id lets an author read their own post while its media is still PENDING.
     const entity = await this.postService.findById(query.id, user?.id, ['media']);
@@ -72,7 +72,7 @@ export class PostQueryController {
     @InternalToken() token: string | undefined,
     @CurrentUser() user: AuthUser | undefined,
   ): Promise<ListPostsResponseDTO> {
-    this.logger.log(`gRPC: Listing posts for author: ${query.authorId ?? 'all'}`);
+    this.logger.debug(`gRPC: Listing posts for author: ${query.authorId ?? 'all'}`);
 
     const page = query.pagination?.page ?? 1;
     const limit = query.pagination?.limit ?? 10;
@@ -112,7 +112,7 @@ export class PostQueryController {
 
   @GrpcMethod(GRPC_SERVICES.POST_SERVICE, 'ListComments')
   async listComments(@Payload() query: ListCommentsQueryDTO): Promise<ListCommentsResponseDTO> {
-    this.logger.log(`gRPC: Listing comments for post: ${query.postId}`);
+    this.logger.debug(`gRPC: Listing comments for post: ${query.postId}`);
 
     await this.postService.findById(query.postId);
 
@@ -146,7 +146,7 @@ export class PostQueryController {
   async listRecentPostsByAuthors(
     @Payload() query: ListRecentPostsByAuthorsQueryDTO,
   ): Promise<ListRecentPostsByAuthorsResponseDTO> {
-    this.logger.log(
+    this.logger.debug(
       `gRPC: Listing recent posts for ${query.allAuthors ? 'all authors' : `${String(query.authorIds.length)} authors`}`,
     );
 
@@ -168,7 +168,7 @@ export class PostQueryController {
   async listPostsByIds(
     @Payload() query: ListPostsByIdsQueryDTO,
   ): Promise<ListPostsByIdsResponseDTO> {
-    this.logger.log(`gRPC: Listing posts by ${String(query.ids.length)} ids`);
+    this.logger.debug(`gRPC: Listing posts by ${String(query.ids.length)} ids`);
 
     const entities = await this.postService.listByIds(query.ids);
 
@@ -182,7 +182,7 @@ export class PostQueryController {
   async listCommentsByAuthor(
     @Payload() query: ListCommentsByAuthorQueryDTO,
   ): Promise<ListCommentsByAuthorResponseDTO> {
-    this.logger.log(`gRPC: Listing comments of author: ${query.authorId}`);
+    this.logger.debug(`gRPC: Listing comments of author: ${query.authorId}`);
 
     const entities = await this.commentService.listByAuthor(
       query.authorId,
