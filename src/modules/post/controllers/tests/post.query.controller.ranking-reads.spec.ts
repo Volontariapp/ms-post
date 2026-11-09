@@ -6,6 +6,7 @@ import { CommentEntity, PostService, CommentService } from '@volontariapp/domain
 import { PostQueryController } from '../post.query.controller.js';
 import { PostTransformer } from '../../transformers/index.js';
 import { SocialEventPostLinkQueryClientService } from '../../clients/social-event-post.query-client.js';
+import { PostsTotalCache } from '../../providers/posts-total-cache.provider.js';
 import {
   ListPostsByIdsQueryDTO,
   ListRecentPostsByAuthorsQueryDTO,
@@ -39,6 +40,7 @@ describe('PostQueryController ranking reads', () => {
           provide: SocialEventPostLinkQueryClientService,
           useValue: createMockSocialEventPostClient(),
         },
+        { provide: PostsTotalCache, useFactory: (): PostsTotalCache => new PostsTotalCache() },
       ],
     }).compile();
 

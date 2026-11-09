@@ -5,6 +5,7 @@ import { PostTransformer } from './transformers/index.js';
 import { PostService, CommentService, PostgresCommentRepository } from '@volontariapp/domain-post';
 import { PostgresPostRepository } from '@volontariapp/domain-post';
 import { SocialEventPostLinkQueryClientService } from './clients/social-event-post.query-client.js';
+import { PostsTotalCache } from './providers/posts-total-cache.provider.js';
 import { StorageClientModule } from '@volontariapp/storage-client';
 import {
   StorageClientConfigModule,
@@ -26,6 +27,7 @@ import {
     CommentService,
     PostTransformer,
     SocialEventPostLinkQueryClientService,
+    { provide: PostsTotalCache, useFactory: (): PostsTotalCache => new PostsTotalCache() },
   ],
   exports: [PostService, CommentService, PostTransformer, SocialEventPostLinkQueryClientService],
 })

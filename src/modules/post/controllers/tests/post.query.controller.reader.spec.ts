@@ -6,6 +6,7 @@ import type { AuthUser } from '@volontariapp/auth';
 import { PostQueryController } from '../post.query.controller.js';
 import { PostTransformer } from '../../transformers/index.js';
 import { SocialEventPostLinkQueryClientService } from '../../clients/social-event-post.query-client.js';
+import { PostsTotalCache } from '../../providers/posts-total-cache.provider.js';
 import { ListPostsQueryDTO, PostQueryDTO } from '../../dto/request/query/post.query.dto.js';
 import { PostCommandFactory } from './post-command.factory.js';
 import {
@@ -32,6 +33,7 @@ describe('PostQueryController reader identity', () => {
           provide: SocialEventPostLinkQueryClientService,
           useValue: createMockSocialEventPostClient(),
         },
+        { provide: PostsTotalCache, useFactory: (): PostsTotalCache => new PostsTotalCache() },
       ],
     }).compile();
 
