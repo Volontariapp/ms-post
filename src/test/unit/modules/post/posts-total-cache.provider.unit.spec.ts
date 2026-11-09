@@ -70,4 +70,46 @@ describe('PostsTotalCache', () => {
       expect(PostsTotalCache.buildKey(undefined, 'reader-1')).toBe('*|reader:reader-1');
     });
   });
+
+  describe('stats', () => {
+    it('counts hits, misses (unknown and expired keys) and evictions', () => {
+      const clock = createClock();
+      const cache = new PostsTotalCache(clock.now, 10_000, 2);
+      cache.get('k1');
+      cache.set('k1', 1);
+      cache.get('k1');
+      cache.get('k1');
+      cache.set('k2', 2);
+      cache.set('k3', 3);
+      clock.advance(10_000);
+      cache.get('k2');
+
+      expect(cache.stats()).toEqual({
+        name: 'posts-total',
+        hits: 2,
+        misses: 2,
+        evictions: 1,
+        size: 1,
+        capacity: 2,
+      });
+    });
+
+    it('exposes the configured name and restarts the counters on reset', () => {
+      const cache = new PostsTotalCache(createClock().now, 10_000, 2, 'named');
+      cache.set('k1', 1);
+      cache.get('k1');
+      cache.get('x');
+
+      cache.resetStats();
+
+      expect(cache.stats()).toEqual({
+        name: 'named',
+        hits: 0,
+        misses: 0,
+        evictions: 0,
+        size: 1,
+        capacity: 2,
+      });
+    });
+  });
 });
